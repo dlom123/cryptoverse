@@ -1,4 +1,4 @@
-# best-of-the-blocks
+# Cryptoverse
 
 ## Project setup
 ```
