@@ -1,9 +1,7 @@
 <template>
-  <v-container fluid class="pa-0 ma-0 fill-height">
+  <v-container fluid class="main-container pa-0 ma-0 fill-height">
     <v-row no-gutters class="fill-height">
-      <v-col class="ma-0 pa-0">
-        <Cryptoverse />
-      </v-col>
+      <Cryptoverse :coins="coins" />
     </v-row>
   </v-container>
 </template>
@@ -20,16 +18,16 @@ export default {
     numCoins: 10,
     coinSize: 64,
     coins: [
-      { rank: 1, name: "Bitcoin", symbol: "BTC" },
-      { rank: 2, name: "Ethereum", symbol: "ETH" },
-      { rank: 3, name: "Cardano", symbol: "ADA" },
-      { rank: 4, name: "Tether", symbol: "USDT" },
-      { rank: 5, name: "Binance Coin", symbol: "BNB" },
-      { rank: 6, name: "XRP", symbol: "XRP" },
-      { rank: 7, name: "Solana", symbol: "SOL" },
-      { rank: 8, name: "USD Coin", symbol: "USDC" },
-      { rank: 9, name: "Polkadot", symbol: "DOT" },
-      { rank: 10, name: "Dogecoin", symbol: "DOGE" },
+      { rank: 1, name: "bitcoin", symbol: "BTC" },
+      { rank: 2, name: "ethereum", symbol: "ETH" },
+      { rank: 3, name: "cardano", symbol: "ADA" },
+      { rank: 4, name: "tether", symbol: "USDT" },
+      { rank: 5, name: "binance coin", symbol: "BNB" },
+      { rank: 6, name: "xrp", symbol: "XRP" },
+      { rank: 7, name: "solana", symbol: "SOL" },
+      { rank: 8, name: "usd coin", symbol: "USDC" },
+      { rank: 9, name: "polkadot", symbol: "DOT" },
+      { rank: 10, name: "dogecoin", symbol: "DOGE" },
     ],
   }),
 };
