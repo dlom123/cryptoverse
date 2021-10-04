@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #canvas {
+      background-image: url('./bg.png');
+      background-size: cover;
+      background-repeat: repeat;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="800" style="border: 2px solid black"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas")
+    const ctx = canvas.getContext("2d")
+
+    const velocity = {
+      default: 0.1,
+      max: 2.0,
+      boost: 0.1
+    }
+
+    const rocket = {
+      width: 32,
+      height: 32,
+      angle: 2.356194490192345, // 135 degrees in radians
+      velocity: 0,
+      x: 0,
+      y: 0
+    }
+    rocket.x = canvas.width / 2 - rocket.width / 2
+    rocket.y = canvas.height / 2 - rocket.height / 2
+    let raf = null
+    let isMoving = false
+
+    // Create rocket image object
+    // TODO: Rotate rocket image and slice off fire boost while stationary.
+    //       Display fire boost while in motion (maybe in various degrees based on velocity).
+    const rocketImg = new Image()
+    rocketImg.src = './rocket-32.png'
+    rocketImg.onload = () => {
+      initRocket()
+      drawRocket()
+    }
+
+    function initRocket() {
+      // Default values for rocket
+      rocket.velocity = velocity.default
+    }
+    function drawRocket() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      console.log(`Drawing rocket at (${rocket.x},${rocket.y})`)
+      ctx.drawImage(
+        rocketImg,
+        rocket.x,
+        rocket.y,
+        rocket.width,
+        rocket.height
+      );
+    }
+    function boost() {
+      // TODO: add or subtract based on angle of trajectory
+      console.log(rocket.angle, rocket.velocity, Math.cos(rocket.angle + rocket.velocity))
+      rocket.x += rocket.velocity
+      rocket.y -= rocket.velocity
+      // console.log(`Rocket: ${rocket.x},${rocket.y}; velocity: ${rocket.velocity}`)
+    }
+    function launchRocket() {
+      boost()
+      drawRocket()
+      raf = window.requestAnimationFrame(launchRocket)
+      isMoving = true
+    }
+    function stopRocket() {
+      window.cancelAnimationFrame(raf)
+      isMoving = false
+      // Reset thrusters
+      initRocket()
+    }
+    function handleKeydown(e) {
+      // console.log('key pressed', e.keyCode)
+      if (e.keyCode === 32) { // Spacebar
+        if (!isMoving) {
+          launchRocket() // Rocket is starting from a standstill
+        } else if (rocket.velocity < velocity.max) {
+          // More boost! Increase rocket speed.
+          rocket.velocity = Math.min(rocket.velocity + velocity.boost, velocity.max)
+        }
+      } else if (e.keyCode === 13 && isMoving) { // Enter
+        // Decrease rocket speed.
+        rocket.velocity = Math.max(rocket.velocity - velocity.boost, 0)
+        if (rocket.velocity === 0) {
+          stopRocket()
+        }
+      } else if (e.keyCode === 37) { // Left arrow
+        // Rotate rocket counter-clockwise and adjust thrust trajectory accordingly
+        const degrees = 5
+        const transX = rocket.x + (rocket.width / 2)
+        const transY = rocket.y + (rocket.height / 2)
+        console.log(`rocket at ${rocket.x},${rocket.y}; translating: ${transX},${transY}`)
+        ctx.translate(transX, transY)
+        ctx.rotate((Math.PI / 180) * -degrees) // degrees-to-radians
+        ctx.translate(-transX, -transY)
+        drawRocket()
+      } else if (e.keyCode === 39) { // Right arrow
+        // Rotate rocket clockwise and adjust thrust trajectory accordingly
+        const degrees = 5
+        const transX = rocket.x + (rocket.width / 2)
+        const transY = rocket.y + (rocket.height / 2)
+        ctx.translate(transX, transY)
+        ctx.rotate((Math.PI / 180) * degrees) // degrees-to-radians
+        ctx.translate(-transX, -transY)
+        drawRocket()
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+  </script>
+</body>
+
+</html>
