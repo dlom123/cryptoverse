@@ -28,7 +28,6 @@ export default {
       provider: {
         context: null,
       },
-      rocketImg: new Image(),
       mouseOverGalaxy: null,
     };
   },
@@ -81,32 +80,6 @@ export default {
       ctx.stroke(border);
       ctx.restore();
       return { x, y, radius, border };
-    },
-    drawRocket(x, y, width) {
-      const ctx = this.provider.animationContext;
-      const vx = 5;
-      const vy = 2;
-      let rocketAnimation;
-
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      // ctx.save();
-      // ctx.translate(i * 50, i * 50);
-      ctx.drawImage(
-        this.rocketImg,
-        x, // left of cryptoid
-        y, // bottom of cryptoid
-        width,
-        width
-      );
-      x += vx;
-      y -= vy;
-      // ctx.restore();
-      // if (x > this.canvasWidth || y > this.canvasHeight) {
-      //   window.cancelAnimationFrame(rocketAnimation);
-      // } else {
-      //   rocketAnimation = window.requestAnimationFrame(this.drawRocket);
-      // }
-      return { x, y };
     },
     getImgRGBs(img) {
       const ctxHidden = this.provider.hiddenContext;
@@ -294,28 +267,6 @@ export default {
       });
       ctxGalaxies.restore();
     },
-
-    spawnRocket(cryptoid) {
-      /* Draws a rocket within a reasonable distance from the given cryptoid. */
-
-      // TODO: make sure rocket is not spawned outside of canvas bounds
-      const distanceX = cryptoid.radius * 3;
-      const distanceY = cryptoid.radius * 3 * 0.75;
-      // x,y are the top-left coordinates of the image
-      console.log(`There's a rocket headed towards ${cryptoid.name}!`);
-      // const rocketX = cryptoid.x - distanceX;
-      // const rocketY = cryptoid.y + distanceY;
-      const rocketWidth = cryptoid.radius / 1.8;
-      let rocketX = this.canvasWidth / 2 - rocketWidth;
-      let rocketY = this.canvasHeight / 2 - rocketWidth;
-      let rocketAnimation;
-      rocketAnimation = window.requestAnimationFrame(() => {
-        const { x, y } = this.drawRocket(rocketX, rocketY, rocketWidth);
-        if (x > this.canvasWidth || y > this.canvasHeight) {
-          window.cancelAnimationFrame(rocketAnimation);
-        }
-      });
-    },
   },
   provide() {
     return {
@@ -354,21 +305,6 @@ export default {
       "mousemove",
       this.onMouseMoveCanvas
     );
-
-    // Load rocket for animation testing
-    const rocketFile = require.context(
-      "../assets/images/",
-      false,
-      /.png$/
-    )("./rocket-32.png");
-    this.rocketImg.src = rocketFile;
-    this.rocketImg.onload = () => {
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "r") {
-          this.spawnRocket(this.cryptoids[0]);
-        }
-      });
-    };
   },
   beforeDestroy() {
     this.$refs["cryptoverse-canvas"].removeEventListener(
@@ -378,9 +314,6 @@ export default {
     this.$refs["cryptoverse-canvas"].removeEventListener(
       "mousemove",
       this.onMouseMoveCanvas
-    );
-    document.removeEventListener("keydown", () =>
-      this.spawnRocket(this.cryptoids[0])
     );
   },
 };
