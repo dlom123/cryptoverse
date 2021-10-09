@@ -1,11 +1,12 @@
 <template>
   <v-col class="ma-0 pa-0">
-    <canvas ref="text-canvas" class="text-canvas">
+    <canvas ref="action-canvas" class="canvas">
+      <!-- the canvas used for user interactions (top-most) -->
       HTML5 Canvas is not supported in your browser.
     </canvas>
-    <canvas ref="cv-canvas" class="cv-canvas">
-      HTML5 Canvas is not supported in your browser.
-    </canvas>
+    <canvas ref="animation-canvas" class="canvas"> </canvas>
+    <canvas ref="cryptoverse-canvas" class="canvas"> </canvas>
+    <canvas ref="hidden-canvas" class="canvas hidden"> </canvas>
     <CryptoidDetails :cryptoid="showCryptoidDetail" />
   </v-col>
 </template>
@@ -13,6 +14,7 @@
 <script>
 import { mapMutations, mapState } from "vuex";
 import CryptoidDetails from "./CryptoidDetails";
+import Rocket from "../functions/Rocket";
 
 export default {
   name: "Canvas",
@@ -26,27 +28,32 @@ export default {
       provider: {
         context: null,
       },
+      rocket: null,
     };
   },
   computed: {
     ...mapState(["showCryptoidDetail"]),
     canvasHeight() {
-      return this.$refs["cv-canvas"].parentElement.clientHeight;
+      return this.$refs["cryptoverse-canvas"].parentElement.clientHeight;
     },
     canvasWidth() {
-      return this.$refs["cv-canvas"].parentElement.clientWidth;
+      return this.$refs["cryptoverse-canvas"].parentElement.clientWidth;
+    },
+    cryptoidFiles() {
+      // point require() context to cryptoids image directory
+      return require.context("../assets/images/cryptoids", false, /.png$/);
     },
   },
   methods: {
     ...mapMutations(["setShowCryptoidDetail"]),
     createCryptoverse() {
       /* Create and populate the entire Cryptoverse */
-      this.loadCryptoids(); // TODO: do this in the background
+      // this.loadCryptoids(); // TODO: do this in the background
     },
     drawCryptoid(img) {
-      /* Draw a Cryptoid within the bounds of the Cryptoverse */
+      /* Draws a Cryptoid within the bounds of the Cryptoverse. */
 
-      const ctx = this.provider.cvContext;
+      const ctx = this.provider.cryptoverseContext;
       const radius = this.getRandomNumber(5, 64);
 
       // make sure cryptoid is not partially outside of canvas bounds
@@ -77,16 +84,10 @@ export default {
       return Math.floor(Math.random() * (max - min + 1) + min);
     },
     loadCryptoids() {
-      // point require context to cryptoids image directory
-      const files = require.context(
-        "../assets/images/cryptoids",
-        false,
-        /.png$/
-      );
       // draw a cryptoid object for each image file that exists
-      files.keys().map((filename) => {
+      this.cryptoidFiles.keys().map((filename) => {
         const img = new Image();
-        img.src = files(filename);
+        img.src = this.cryptoidFiles(filename);
         img.onload = () => {
           const { border, radius, x, y } = this.drawCryptoid(img);
           const { symbol } = this.coins.find(
@@ -105,7 +106,7 @@ export default {
       });
     },
     onClickCanvas(e) {
-      const ctx = this.provider.cvContext;
+      const ctx = this.provider.cryptoverseContext;
       // Find out which cryptoids were clicked
       const clickedCryptoids = this.cryptoids.filter((cryptoid) =>
         ctx.isPointInPath(cryptoid.path, e.pageX, e.pageY)
@@ -122,24 +123,21 @@ export default {
       }
     },
     onMouseMoveCanvas(e) {
-      const ctx = this.provider.cvContext;
-      const ctxText = this.provider.textContext;
+      const ctx = this.provider.cryptoverseContext;
+      const ctxText = this.provider.actionContext;
       // Is the mouse over any of the cryptoids?
       const mouseOverCryptoids = this.cryptoids.filter((cryptoid) =>
         ctx.isPointInPath(cryptoid.path, e.pageX, e.pageY)
       );
       if (mouseOverCryptoids.length) {
-        this.$refs["cv-canvas"].style.cursor = "pointer";
-        ctxText.fillStyle = "white";
-        mouseOverCryptoids.forEach((c) => {
-          const fontSize = Math.max(c.radius / 2, 12);
-          ctxText.font = `${fontSize}px sans-serif`;
-          ctxText.textAlign = "center";
-          ctxText.fillText(c.name, c.x, c.y + c.radius + fontSize);
-        });
-      } else {
-        this.$refs["cv-canvas"].style.cursor = "default";
-        ctxText.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        // this.$refs["cryptoverse-canvas"].style.cursor = "pointer";
+        // ctxText.fillStyle = "white";
+        // mouseOverCryptoids.forEach((c) => {
+        //   const fontSize = Math.max(c.radius / 2, 12);
+        //   ctxText.font = `${fontSize}px sans-serif`;
+        //   ctxText.textAlign = "center";
+        //   ctxText.fillText(c.name, c.x, c.y + c.radius + fontSize);
+        // });
       }
     },
   },
@@ -149,28 +147,57 @@ export default {
     };
   },
   mounted() {
-    this.provider.cvContext = this.$refs["cv-canvas"].getContext("2d");
-    this.provider.textContext = this.$refs["text-canvas"].getContext("2d");
-    const cWidth = this.$refs["cv-canvas"].parentElement.clientWidth;
-    const cHeight = this.$refs["cv-canvas"].parentElement.clientHeight;
-    this.$refs["cv-canvas"].width = cWidth;
-    this.$refs["cv-canvas"].height = cHeight;
-    this.$refs["text-canvas"].width = cWidth;
-    this.$refs["text-canvas"].height = cHeight;
+    // Attach each canvas context to Vue provider for easy use in other components
+    this.provider.cryptoverseContext =
+      this.$refs["cryptoverse-canvas"].getContext("2d");
+    this.provider.actionContext = this.$refs["action-canvas"].getContext("2d");
+    this.provider.animationContext =
+      this.$refs["animation-canvas"].getContext("2d");
+    this.provider.hiddenContext = this.$refs["hidden-canvas"].getContext("2d");
 
+    // Set dimensions of each canvas
+    [
+      "cryptoverse-canvas",
+      "action-canvas",
+      "animation-canvas",
+      "hidden-canvas",
+    ].forEach((c) => {
+      this.$refs[c].width = this.canvasWidth;
+      this.$refs[c].height = this.canvasHeight;
+    });
+
+    // Draw the Cryptoverse!
     this.createCryptoverse();
-    this.$refs["cv-canvas"].addEventListener("click", this.onClickCanvas);
-    this.$refs["cv-canvas"].addEventListener(
+
+    // Register event handlers
+    this.$refs["cryptoverse-canvas"].addEventListener(
+      "click",
+      this.onClickCanvas
+    );
+    this.$refs["cryptoverse-canvas"].addEventListener(
       "mousemove",
       this.onMouseMoveCanvas
     );
+
+    // Prep the Rocket!
+    const animationContext = this.provider.animationContext;
+    this.rocket = new Rocket(
+      animationContext,
+      animationContext.canvas.width / 2,
+      animationContext.canvas.height / 2
+    );
+    this.rocket.spawn(); // Hello, rocket!
   },
   beforeDestroy() {
-    this.$refs["cv-canvas"].removeEventListener("click", this.onClickCanvas);
-    this.$refs["cv-canvas"].removeEventListener(
+    this.$refs["cryptoverse-canvas"].removeEventListener(
+      "click",
+      this.onClickCanvas
+    );
+    this.$refs["cryptoverse-canvas"].removeEventListener(
       "mousemove",
       this.onMouseMoveCanvas
     );
+    this.rocket.destroy();
   },
 };
 </script>
