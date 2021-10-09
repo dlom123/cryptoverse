@@ -12,7 +12,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.speed = 0;
   this.pressedKeys = {};
   // Rocket settings
-  this.maxSpeed = 15;
+  this.maxSpeed = 5;
   this.boostPower = 0.2; // Acceleration increment
   this.steering = 5; // Rotation sensitivity
 
