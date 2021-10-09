@@ -14,6 +14,7 @@
 <script>
 import { mapMutations, mapState } from "vuex";
 import CryptoidDetails from "./CryptoidDetails";
+import Rocket from "../functions/Rocket";
 
 export default {
   name: "Canvas",
@@ -29,6 +30,7 @@ export default {
         context: null,
       },
       mouseOverGalaxy: null,
+      rocket: null,
     };
   },
   computed: {
@@ -305,6 +307,15 @@ export default {
       "mousemove",
       this.onMouseMoveCanvas
     );
+
+    // Prep the Rocket!
+    const animationContext = this.provider.animationContext;
+    this.rocket = new Rocket(
+      animationContext,
+      animationContext.canvas.width / 2,
+      animationContext.canvas.height / 2
+    );
+    this.rocket.spawn(); // Hello, rocket!
   },
   beforeDestroy() {
     this.$refs["cryptoverse-canvas"].removeEventListener(
@@ -315,6 +326,7 @@ export default {
       "mousemove",
       this.onMouseMoveCanvas
     );
+    this.rocket.destroy();
   },
 };
 </script>
