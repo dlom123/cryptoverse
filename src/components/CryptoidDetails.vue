@@ -14,10 +14,7 @@
               <v-row>
                 <v-col cols="12" align="center" class="pa-0">
                   <v-avatar size="128">
-                    <v-img
-                      :src="cryptoid.image.src"
-                      class="img-cryptoid"
-                    ></v-img>
+                    <v-img :src="cryptoid.img.src" class="img-cryptoid"></v-img>
                   </v-avatar>
                 </v-col>
               </v-row>
@@ -34,8 +31,8 @@
             </v-col>
           </v-row>
           <v-row no-gutters class="mt-4">
-            <v-col cols="12"> x: {{ cryptoid.x }} </v-col>
-            <v-col cols="12"> y: {{ cryptoid.y }} </v-col>
+            <v-col cols="12"> x: {{ cryptoid.coords.x }} </v-col>
+            <v-col cols="12"> y: {{ cryptoid.coords.y }} </v-col>
           </v-row>
         </v-card-text>
         <!-- <v-card-actions>

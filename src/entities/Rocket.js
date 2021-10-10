@@ -1,4 +1,4 @@
-import { degreesToRadians, round } from "./helpers"
+import { degreesToRadians, round } from "../functions/helpers"
 
 export default function Rocket(ctx, x = 0, y = 0) {
   // Init variables
@@ -18,12 +18,12 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.spawn = () => {
     /* Loads the rocket image and spawns it on the screen. */
-    const rocketFile = require.context(
+    const rocketImgFile = require.context(
       "../assets/images/",
       false,
       /.png$/
     )("./rocket.png")
-    this.img.src = rocketFile
+    this.img.src = rocketImgFile
     this.img.onload = () => {
       this.width = this.img.width
       this.height = this.img.height
