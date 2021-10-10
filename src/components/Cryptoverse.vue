@@ -19,10 +19,11 @@
 import { mapMutations, mapState } from "vuex";
 import CryptoidDetails from "@/components/CryptoidDetails";
 import { Cryptoid, Galaxy, Rocket } from "@/entities";
+import allGalaxies from "@/data/galaxies.json";
+import allCryptoids from "@/data/cryptoids.json";
 
 export default {
   name: "Canvas",
-  props: ["coins", "allGalaxies"],
   components: {
     CryptoidDetails,
   },
@@ -60,7 +61,7 @@ export default {
       // this.loadCryptoids(); // Not doing this at the moment
     },
     loadCryptoids() {
-      this.coins.forEach((coin) => {
+      allCryptoids.forEach((coin) => {
         const cryptoid = new Cryptoid(
           this.provider.bgContext,
           this.provider.userContext,
@@ -134,7 +135,7 @@ export default {
     },
     plotGalaxies() {
       // Create the bounding area for each galaxy
-      this.allGalaxies.forEach((g) => {
+      allGalaxies.forEach((g) => {
         const galaxy = new Galaxy(
           g.name,
           g.coords,
