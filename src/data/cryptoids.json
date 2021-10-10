@@ -1,0 +1,62 @@
+[
+  {
+    "rank": 1,
+    "name": "bitcoin",
+    "symbol": "BTC",
+    "filename": "bitcoin.png"
+  },
+  {
+    "rank": 2,
+    "name": "ethereum",
+    "symbol": "ETH",
+    "filename": "ethereum.png"
+  },
+  {
+    "rank": 3,
+    "name": "cardano",
+    "symbol": "ADA",
+    "filename": "cardano.png"
+  },
+  {
+    "rank": 4,
+    "name": "tether",
+    "symbol": "USDT",
+    "filename": "tether.png"
+  },
+  {
+    "rank": 5,
+    "name": "binance coin",
+    "symbol": "BNB",
+    "filename": "binance-coin.png"
+  },
+  {
+    "rank": 6,
+    "name": "xrp",
+    "symbol": "XRP",
+    "filename": "xrp.png"
+  },
+  {
+    "rank": 7,
+    "name": "solana",
+    "symbol": "SOL",
+    "filename": "solana.png"
+  },
+  {
+    "rank": 8,
+    "name": "usd coin",
+    "symbol": "USDC",
+    "filename": "usd-coin.png"
+  },
+  {
+    "rank": 9,
+    "name": "polkadot",
+    "symbol": "DOT",
+    "filename": "polkadot.png"
+  },
+  {
+    "rank": 10,
+    "name": "dogecoin",
+    "symbol": "DOGE",
+    "filename": "dogecoin.png"
+  }
+]
