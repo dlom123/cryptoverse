@@ -31,6 +31,7 @@ export default {
       cryptoids: [],
       galaxies: [],
       isMouseOverCryptoid: false,
+      isMouseOverGalaxy: false,
       provider: {
         context: null,
       },
@@ -89,16 +90,13 @@ export default {
       }
     },
     onMouseMoveCanvas(e) {
-      const ctxBg = this.provider.bgContext;
       const ctxUser = this.provider.userContext;
+
       // Is the mouse over any of the cryptoids?
-      const previousMouseOverCryptoids = this.mouseIsOver.cryptoids;
+      const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
       this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
         ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
       );
-      this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
-        return ctxBg.isPointInPath(galaxy.targetArea, e.pageX, e.pageY);
-      });
       if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
         this.isMouseOverCryptoid = true;
         this.mouseIsOver.cryptoids.forEach((cryptoid) => {
@@ -113,36 +111,26 @@ export default {
           cryptoid.handleMouseOut();
         });
       }
-      // if (mouseOverGalaxy.length && !this.isMouseOverGalaxy) {
-      //   this.isMouseOver.push("galaxy");
-      //   mouseOverGalaxy.forEach((g) => {
-      //     // Draw the dashed line bounding rect for the galaxy
-      //     const leftX = g.coords.x - g.width / 2;
-      //     const topY = g.coords.y - g.height / 2;
-      //     const bottomY = g.coords.y + g.height / 2;
-      //     const bottomYPadding = -5;
-      //     ctxUser.save();
-      //     ctxUser.strokeStyle = "rgba(173, 216, 230, 0.7)";
-      //     ctxUser.setLineDash([4, 2]);
-      //     ctxUser.lineDashOffset = 2;
-      //     ctxUser.strokeRect(leftX, topY, g.width, g.height);
-      //     // Draw the galaxy name as text
-      //     ctxUser.fillStyle = "red";
-      //     ctxUser.font = "32px sans-serif";
-      //     ctxUser.textBaseline = "bottom";
-      //     const textMetrics = ctxUser.measureText(g.name); // get text measurements for centering within galaxy
-      //     const textOffsetX = (g.width - textMetrics.width) / 2;
-      //     ctxUser.fillText(
-      //       g.name,
-      //       leftX + textOffsetX,
-      //       bottomY + bottomYPadding
-      //     );
-      //     ctxUser.restore();
-      //   });
-      // } else if (!mouseOverGalaxy.length && this.isMouseOverGalaxy) {
-      //   ctxUser.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-      //   this.isMouseOverGalaxy = false;
-      // }
+
+      // Is the mouse over any of the galaxies?
+      const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
+      this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
+        if (galaxy.targetArea) {
+          // Make sure the galaxy has fully loaded its targetArea
+          return ctxUser.isPointInPath(galaxy.targetArea, e.pageX, e.pageY);
+        }
+      });
+      if (this.mouseIsOver.galaxies.length && !this.isMouseOverGalaxy) {
+        this.isMouseOverGalaxy = true;
+        this.mouseIsOver.galaxies.forEach((galaxy) => {
+          galaxy.handleMouseOver();
+        });
+      } else if (!this.mouseIsOver.galaxies.length && this.isMouseOverGalaxy) {
+        this.isMouseOverGalaxy = false;
+        previousMouseOverGalaxies.forEach((galaxy) => {
+          galaxy.handleMouseOut();
+        });
+      }
     },
     plotGalaxies() {
       // Create the bounding area for each galaxy
@@ -153,7 +141,8 @@ export default {
           g.width,
           g.height,
           g.repCoin,
-          this.provider.bgContext
+          this.provider.bgContext,
+          this.provider.userContext
         );
         galaxy.generate();
 
@@ -184,8 +173,11 @@ export default {
     this.createCryptoverse();
 
     // Register event handlers
-    this.$refs["user-canvas"].addEventListener("click", this.onClickCanvas);
-    this.$refs["user-canvas"].addEventListener(
+    this.provider.userContext.canvas.addEventListener(
+      "click",
+      this.onClickCanvas
+    );
+    this.provider.userContext.canvas.addEventListener(
       "mousemove",
       this.onMouseMoveCanvas
     );
@@ -200,8 +192,11 @@ export default {
     this.rocket.spawn(); // Hello, rocket!
   },
   beforeDestroy() {
-    this.$refs["bg-canvas"].removeEventListener("click", this.onClickCanvas);
-    this.$refs["bg-canvas"].removeEventListener(
+    this.provider.userContext.canvas.removeEventListener(
+      "click",
+      this.onClickCanvas
+    );
+    this.provider.userContext.canvas.removeEventListener(
       "mousemove",
       this.onMouseMoveCanvas
     );

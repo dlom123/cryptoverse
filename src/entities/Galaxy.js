@@ -1,6 +1,6 @@
 import { getImgRGBs } from "../functions/helpers"
 
-export default function Galaxy(name, coords, width, height, repCoin, ctx) {
+export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxUser) {
   // Init variables
   this.name = name
   this.coords = { // Center of the galaxy
@@ -10,7 +10,8 @@ export default function Galaxy(name, coords, width, height, repCoin, ctx) {
   this.width = width
   this.height = height
   this.repCoin = repCoin // The galaxy's representative coin
-  this.ctx = ctx
+  this.ctxBg = ctxBg
+  this.ctxUser = ctxUser
   // Galaxy settings
   this.colorVariety = 3 // How many colors to sample from the repCoin image for drawing the galaxy
   this.rgbs = [] // Sampled RGB values that represent the galaxy visually
@@ -68,20 +69,20 @@ export default function Galaxy(name, coords, width, height, repCoin, ctx) {
     */
 
     // Draw each of the colors from the `rgbs` array onto the canvas
-    this.ctx.save();
+    this.ctxBg.save();
     rgbs.forEach((rgb, i) => {
-      this.ctx.fillStyle = `rgba(${rgb})`;
-      this.ctx.fillRect(200 + i, 200, 2, 2);
+      this.ctxBg.fillStyle = `rgba(${rgb})`;
+      this.ctxBg.fillRect(200 + i, 200, 2, 2);
     });
-    this.ctx.restore();
+    this.ctxBg.restore();
   }
 
   this.draw = () => {
     /* Draws the abstract background for the galaxy from sampled RGB values. */
 
-    this.ctx.save();
+    this.ctxBg.save();
     // Create the gradient
-    const radgrad = this.ctx.createRadialGradient(
+    const radgrad = this.ctxBg.createRadialGradient(
       this.coords.x,
       this.coords.y,
       this.width / (this.width / 2),
@@ -93,10 +94,11 @@ export default function Galaxy(name, coords, width, height, repCoin, ctx) {
     radgrad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
     radgrad.addColorStop(0.2, `rgba(${this.rgbs[0]}, 0.7)`);
     radgrad.addColorStop(0.4, `rgba(${this.rgbs[1]}, 0.3)`);
+    radgrad.addColorStop(0.5, `rgba(${this.rgbs[2]}, 0.2)`);
     radgrad.addColorStop(1, "rgba(0, 0, 0, 0)");
 
     // Draw the gradient
-    this.ctx.fillStyle = radgrad;
+    this.ctxBg.fillStyle = radgrad;
     const path = new Path2D();
     path.rect(
       this.coords.x - this.width / 2,
@@ -104,9 +106,41 @@ export default function Galaxy(name, coords, width, height, repCoin, ctx) {
       this.width,
       this.height
     );
-    this.ctx.fill(path);
+    this.ctxBg.fill(path);
     this.targetArea = path
 
-    this.ctx.restore();
+    this.ctxBg.restore();
+  }
+
+  this.handleMouseOver = () => {
+    // Draw the dashed line bounding rect for the galaxy
+    const leftX = this.coords.x - this.width / 2;
+    const topY = this.coords.y - this.height / 2;
+    const bottomY = this.coords.y + this.height / 2;
+    const bottomYPadding = -5;
+
+    this.ctxUser.save();
+    this.ctxUser.strokeStyle = "rgba(173, 216, 230, 0.7)";
+    this.ctxUser.setLineDash([4, 2]);
+    this.ctxUser.lineDashOffset = 2;
+    this.ctxUser.strokeRect(leftX, topY, this.width, this.height);
+
+    // Draw the galaxy name as text
+    this.ctxUser.fillStyle = "red";
+    this.ctxUser.font = "32px sans-serif";
+    this.ctxUser.textBaseline = "bottom";
+    const textMetrics = this.ctxUser.measureText(this.name); // get text measurements for centering within galaxy
+    const textOffsetX = (this.width - textMetrics.width) / 2;
+    this.ctxUser.fillText(
+      this.name,
+      leftX + textOffsetX,
+      bottomY + bottomYPadding
+    );
+
+    this.ctxUser.restore();
+  }
+
+  this.handleMouseOut = () => {
+    this.ctxUser.clearRect(0, 0, this.ctxUser.canvas.width, this.ctxUser.canvas.height);
   }
 }
