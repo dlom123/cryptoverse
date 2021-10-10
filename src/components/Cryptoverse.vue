@@ -57,7 +57,7 @@ export default {
     createCryptoverse() {
       /* Create and populate the entire Cryptoverse */
       this.plotGalaxies();
-      // this.loadCryptoids();
+      // this.loadCryptoids(); // Not doing this at the moment
     },
     loadCryptoids() {
       this.coins.forEach((coin) => {
