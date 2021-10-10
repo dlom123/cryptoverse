@@ -1,0 +1,32 @@
+[
+  {
+    "name": "The NFT Way",
+    "coords": {
+      "x": 721,
+      "y": 721
+    },
+    "width": 300,
+    "height": 200,
+    "repCoin": {
+      "rank": 7,
+      "name": "solana",
+      "symbol": "SOL",
+      "filename": "solana.png"
+    }
+  },
+  {
+    "name": "Alpha Satoshi",
+    "coords": {
+      "x": 258,
+      "y": 158
+    },
+    "width": 500,
+    "height": 300,
+    "repCoin": {
+      "rank": 1,
+      "name": "bitcoin",
+      "symbol": "BTC",
+      "filename": "bitcoin.png"
+    }
+  }
+]
