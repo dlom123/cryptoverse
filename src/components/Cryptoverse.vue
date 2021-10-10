@@ -1,11 +1,15 @@
 <template>
   <v-col id="cryptoverse" class="ma-0 pa-0">
     <canvas ref="bg-canvas" class="canvas">
-      <!-- the canvas used for user interactions (top-most) -->
+      <!-- the canvas used for the non-interactive backdrop (bottom-most) -->
       HTML5 Canvas is not supported in your browser.
     </canvas>
-    <canvas ref="animation-canvas" class="canvas"> </canvas>
-    <canvas ref="user-canvas" class="canvas"></canvas>
+    <canvas ref="animation-canvas" class="canvas">
+      <!-- the canvas used for animations -->
+    </canvas>
+    <canvas ref="user-canvas" class="canvas">
+      <!-- the canvas used for user interactions (top-most) -->
+    </canvas>
 
     <CryptoidDetails :cryptoid="showCryptoidDetail" />
   </v-col>
@@ -13,9 +17,8 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
-import CryptoidDetails from "./CryptoidDetails";
-import { Galaxy, Rocket } from "@/entities";
-import { getRandomNumber } from "@/functions/helpers";
+import CryptoidDetails from "@/components/CryptoidDetails";
+import { Cryptoid, Galaxy, Rocket } from "@/entities";
 
 export default {
   name: "Canvas",
@@ -27,10 +30,15 @@ export default {
     return {
       cryptoids: [],
       galaxies: [],
+      isMouseOverCryptoid: false,
       provider: {
         context: null,
       },
-      mouseOverGalaxy: null,
+      mouseIsOver: {
+        // Object containing everything the mouse is currently over
+        cryptoids: [],
+        galaxies: [],
+      },
       rocket: null,
     };
   },
@@ -42,75 +50,32 @@ export default {
     canvasWidth() {
       return this.$refs["bg-canvas"].parentElement.clientWidth;
     },
-    cryptoidFiles() {
-      // point require() context to cryptoids image directory
-      return require.context("../assets/images/cryptoids", false, /.png$/);
-    },
   },
   methods: {
     ...mapMutations(["setShowCryptoidDetail"]),
     createCryptoverse() {
       /* Create and populate the entire Cryptoverse */
       this.plotGalaxies();
-      // this.loadCryptoids(); // TODO: do this in the background
-    },
-    drawCryptoid(img) {
-      /* Draws a Cryptoid within the bounds of the Cryptoverse. */
-
-      const ctx = this.provider.bgContext;
-      const radius = getRandomNumber(5, 64);
-
-      // make sure cryptoid is not partially outside of canvas bounds
-      const x = getRandomNumber(radius, this.canvasWidth - radius * 2);
-      const y = getRandomNumber(radius, this.canvasHeight - radius * 2);
-      // x,y are the top-left coordinates of the image
-      ctx.drawImage(img, x, y, radius * 2, radius * 2);
-
-      ctx.save();
-      // draw a circular border around the image
-      ctx.strokeStyle = "rgba(173, 216, 230, 0.5)"; // lightblue
-      ctx.lineWidth = 2;
-      const border = new Path2D();
-      const borderRadius = radius;
-      border.arc(
-        x + borderRadius, // x starts at the left of the image, not the center
-        y + borderRadius, // y starts at the top of the image, not the center
-        borderRadius,
-        0,
-        Math.PI * 2,
-        false
-      );
-      ctx.stroke(border);
-      ctx.restore();
-      return { x, y, radius, border };
+      // this.loadCryptoids();
     },
     loadCryptoids() {
-      // draw a cryptoid object for each image file that exists
-      this.cryptoidFiles.keys().map((filename) => {
-        const img = new Image();
-        img.src = this.cryptoidFiles(filename);
-        img.onload = () => {
-          const { border, radius, x, y } = this.drawCryptoid(img);
-          const { symbol } = this.coins.find(
-            (c) => c.name === filename.slice(2, -4).replace("-", " ")
-          );
-          this.cryptoids.push({
-            name: filename.slice(2, -4),
-            symbol,
-            image: img,
-            x: x + radius,
-            y: y + radius,
-            radius,
-            targetArea: border,
-          });
-        };
+      this.coins.forEach((coin) => {
+        const cryptoid = new Cryptoid(
+          this.provider.bgContext,
+          this.provider.userContext,
+          coin
+        );
+        cryptoid.load();
+
+        // Maintain an array of all existing cryptoids
+        this.cryptoids.push(cryptoid);
       });
     },
     onClickCanvas(e) {
-      const ctx = this.provider.bgContext;
+      const ctxUser = this.provider.userContext;
       // Find out which cryptoids were clicked
       const clickedCryptoids = this.cryptoids.filter((cryptoid) =>
-        ctx.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+        ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
       );
       const clickedCryptoid = clickedCryptoids.pop();
       if (clickedCryptoid) {
@@ -124,55 +89,60 @@ export default {
       }
     },
     onMouseMoveCanvas(e) {
-      const ctx = this.provider.bgContext;
+      const ctxBg = this.provider.bgContext;
       const ctxUser = this.provider.userContext;
       // Is the mouse over any of the cryptoids?
-      const mouseOverCryptoids = this.cryptoids.filter((cryptoid) =>
+      const previousMouseOverCryptoids = this.mouseIsOver.cryptoids;
+      this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
         ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
       );
-      const mouseOverGalaxy = this.galaxies.filter((galaxy) => {
-        console.log("mouse galaxy");
-        return ctx.isPointInPath(galaxy.targetArea, e.pageX, e.pageY);
+      this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
+        return ctxBg.isPointInPath(galaxy.targetArea, e.pageX, e.pageY);
       });
-      if (mouseOverCryptoids.length) {
-        // this.$refs["bg-canvas"].style.cursor = "pointer";
-        // ctxUser.fillStyle = "white";
-        // mouseOverCryptoids.forEach((c) => {
-        //   const fontSize = Math.max(c.radius / 2, 12);
-        //   ctxUser.font = `${fontSize}px sans-serif`;
-        //   ctxUser.textAlign = "center";
-        //   ctxUser.fillText(c.name, c.x, c.y + c.radius + fontSize);
-        // });
-      }
-      if (mouseOverGalaxy.length) {
-        mouseOverGalaxy.forEach((g) => {
-          // Draw the dashed line bounding rect for the galaxy
-          const leftX = g.coords.x - g.width / 2;
-          const topY = g.coords.y - g.height / 2;
-          const bottomY = g.coords.y + g.height / 2;
-          const bottomYPadding = -5;
-          ctxUser.save();
-          ctxUser.strokeStyle = "rgba(173, 216, 230, 0.7)";
-          ctxUser.setLineDash([4, 2]);
-          ctxUser.lineDashOffset = 2;
-          ctxUser.strokeRect(leftX, topY, g.width, g.height);
-          // Draw the galaxy name as text
-          ctxUser.fillStyle = "red";
-          ctxUser.font = "32px sans-serif";
-          ctxUser.textBaseline = "bottom";
-          const textMetrics = ctxUser.measureText(g.name); // get text measurements for centering within galaxy
-          const textOffsetX = (g.width - textMetrics.width) / 2;
-          ctxUser.fillText(
-            g.name,
-            leftX + textOffsetX,
-            bottomY + bottomYPadding
-          );
-          ctxUser.restore();
+      if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
+        this.isMouseOverCryptoid = true;
+        this.mouseIsOver.cryptoids.forEach((cryptoid) => {
+          cryptoid.handleMouseOver();
         });
-      } else {
-        this.$refs["bg-canvas"].style.cursor = "default";
-        ctxUser.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+      } else if (
+        !this.mouseIsOver.cryptoids.length &&
+        this.isMouseOverCryptoid
+      ) {
+        this.isMouseOverCryptoid = false;
+        previousMouseOverCryptoids.forEach((cryptoid) => {
+          cryptoid.handleMouseOut();
+        });
       }
+      // if (mouseOverGalaxy.length && !this.isMouseOverGalaxy) {
+      //   this.isMouseOver.push("galaxy");
+      //   mouseOverGalaxy.forEach((g) => {
+      //     // Draw the dashed line bounding rect for the galaxy
+      //     const leftX = g.coords.x - g.width / 2;
+      //     const topY = g.coords.y - g.height / 2;
+      //     const bottomY = g.coords.y + g.height / 2;
+      //     const bottomYPadding = -5;
+      //     ctxUser.save();
+      //     ctxUser.strokeStyle = "rgba(173, 216, 230, 0.7)";
+      //     ctxUser.setLineDash([4, 2]);
+      //     ctxUser.lineDashOffset = 2;
+      //     ctxUser.strokeRect(leftX, topY, g.width, g.height);
+      //     // Draw the galaxy name as text
+      //     ctxUser.fillStyle = "red";
+      //     ctxUser.font = "32px sans-serif";
+      //     ctxUser.textBaseline = "bottom";
+      //     const textMetrics = ctxUser.measureText(g.name); // get text measurements for centering within galaxy
+      //     const textOffsetX = (g.width - textMetrics.width) / 2;
+      //     ctxUser.fillText(
+      //       g.name,
+      //       leftX + textOffsetX,
+      //       bottomY + bottomYPadding
+      //     );
+      //     ctxUser.restore();
+      //   });
+      // } else if (!mouseOverGalaxy.length && this.isMouseOverGalaxy) {
+      //   ctxUser.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+      //   this.isMouseOverGalaxy = false;
+      // }
     },
     plotGalaxies() {
       // Create the bounding area for each galaxy
@@ -186,6 +156,8 @@ export default {
           this.provider.bgContext
         );
         galaxy.generate();
+
+        // Maintain an array of all existing galaxies
         this.galaxies.push(galaxy);
       });
     },

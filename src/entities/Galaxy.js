@@ -56,7 +56,6 @@ export default function Galaxy(name, coords, width, height, repCoin, ctx) {
         rgbs.splice(Math.floor(Math.random() * rgbs.length), 1)
       );
     }
-    // sampleRGBs.forEach((rgb) => console.log(rgb));  
     return sampleRGBs
   }
 
