@@ -3,18 +3,21 @@
     <v-dialog
       width="500"
       overlay-color="blue"
-      :value="cryptoid"
+      :value="showCryptoidDetail"
       @click:outside="closeDialog"
       @keydown="closeDialog"
     >
-      <v-card v-if="cryptoid" class="mx-auto">
+      <v-card v-if="showCryptoidDetail" class="mx-auto">
         <v-img :src="bgImg" max-height="160">
           <v-card-title>
             <v-container>
               <v-row>
                 <v-col cols="12" align="center" class="pa-0">
                   <v-avatar size="128">
-                    <v-img :src="cryptoid.img.src" class="img-cryptoid"></v-img>
+                    <v-img
+                      :src="showCryptoidDetail.img.src"
+                      class="img-cryptoid"
+                    ></v-img>
                   </v-avatar>
                 </v-col>
               </v-row>
@@ -24,16 +27,16 @@
         <v-card-text class="pt-4">
           <v-row no-gutters>
             <v-col cols="12">
-              <h1>{{ toTitleCase(cryptoid.name) }}</h1>
+              <h1>{{ toTitleCase(showCryptoidDetail.name) }}</h1>
             </v-col>
             <v-col cols="12">
-              {{ cryptoid.symbol }}
+              {{ showCryptoidDetail.symbol }}
             </v-col>
           </v-row>
-          <v-row no-gutters class="mt-4">
-            <v-col cols="12"> x: {{ cryptoid.coords.x }} </v-col>
-            <v-col cols="12"> y: {{ cryptoid.coords.y }} </v-col>
-          </v-row>
+          <!-- <v-row no-gutters class="mt-4">
+            <v-col cols="12"> x: {{ showCryptoidDetail.coords.x }} </v-col>
+            <v-col cols="12"> y: {{ showCryptoidDetail.coords.y }} </v-col>
+          </v-row> -->
         </v-card-text>
         <!-- <v-card-actions>
           <v-btn
@@ -58,12 +61,12 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapMutations, mapState } from "vuex";
 
 export default {
   name: "CryptoidDetails",
-  props: ["cryptoid"],
   computed: {
+    ...mapState(["showCryptoidDetail"]),
     bgImg() {
       return require.context("../assets/images/", false, /.png$/)("./bg.png");
     },
