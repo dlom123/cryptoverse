@@ -11,7 +11,7 @@
       <!-- the canvas used for user interactions (top-most) -->
     </canvas>
 
-    <CryptoidDetails :cryptoid="showCryptoidDetail" />
+    <CryptoidDetails />
   </v-col>
 </template>
 
@@ -30,7 +30,6 @@ export default {
   data() {
     return {
       cryptoids: [],
-      galaxies: [],
       isMouseOverCryptoid: false,
       isMouseOverGalaxy: false,
       provider: {
@@ -45,7 +44,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["showCryptoidDetail"]),
+    ...mapState(["galaxies"]),
     canvasHeight() {
       return this.$refs["bg-canvas"].parentElement.clientHeight;
     },
@@ -54,7 +53,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setShowCryptoidDetail"]),
+    ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
     createCryptoverse() {
       /* Create and populate the entire Cryptoverse */
       this.plotGalaxies();
@@ -116,9 +115,9 @@ export default {
       // Is the mouse over any of the galaxies?
       const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
       this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
-        if (galaxy.targetArea) {
-          // Make sure the galaxy has fully loaded its targetArea
-          return ctxUser.isPointInPath(galaxy.targetArea, e.pageX, e.pageY);
+        if (galaxy.path) {
+          // Make sure the galaxy has fully loaded its path
+          return ctxUser.isPointInPath(galaxy.path, e.pageX, e.pageY);
         }
       });
       if (this.mouseIsOver.galaxies.length && !this.isMouseOverGalaxy) {
@@ -134,11 +133,12 @@ export default {
       }
     },
     plotGalaxies() {
+      const galaxies = [];
       // Create the bounding area for each galaxy
       allGalaxies.forEach((g) => {
         const galaxy = new Galaxy(
           g.name,
-          g.coords,
+          g.coords, // center of galaxy
           g.width,
           g.height,
           g.repCoin,
@@ -148,8 +148,10 @@ export default {
         galaxy.generate();
 
         // Maintain an array of all existing galaxies
-        this.galaxies.push(galaxy);
+        galaxies.push(galaxy);
       });
+
+      this.setGalaxies(galaxies);
     },
   },
   provide() {

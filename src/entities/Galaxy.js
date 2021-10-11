@@ -15,7 +15,9 @@ export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxU
   // Galaxy settings
   this.colorVariety = 3 // How many colors to sample from the repCoin image for drawing the galaxy
   this.rgbs = [] // Sampled RGB values that represent the galaxy visually
-  this.targetArea = null // The Path2D object that represents the virtual boundaries of the galaxy
+  this.path = null // The Path2D object that represents the virtual boundaries of the galaxy
+  this.targetPercent = 0.2 // The percentage of the galaxy used for actions, from the middle out
+  this.targetPath = null // The Path2D object that represents the actionable portion of the galaxy
 
   this.generate = async () => {
     /* Generates and displays the galaxy. */
@@ -30,23 +32,25 @@ export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxU
 
   this.getRGBs = async () => {
     // Load the image file for the galaxy
-    const repCoinImg = this.loadRepImg()
-    await repCoinImg.decode() // After this, the image is loaded and ready
-    const rgbs = getImgRGBs(repCoinImg)
+    this.loadRepImg()
+    await this.repCoin.img.decode() // After this, the image is loaded and ready
+    const rgbs = getImgRGBs(this.repCoin.img)
 
     // Sample three random rgbs to use for the gradient
     const sampledRGBs = this.sampleRGBs(rgbs, this.colorVariety)
+
+    /* TODO: sort sampledRGBs from lightest to darkest?
+         - That way, the galaxy gradient can be darkest towards the outside
+    */
 
     return sampledRGBs
   }
 
   this.loadRepImg = () => {
     /* Returns the image for the galaxy's representative coin. */
-
     const repCoinImgFile = require.context("../assets/images/cryptoids", false, /.png$/)(`./${this.repCoin.filename}`);
-    const img = new Image()
-    img.src = repCoinImgFile;
-    return img
+    this.repCoin.img = new Image()
+    this.repCoin.img.src = repCoinImgFile;
   }
 
   this.sampleRGBs = (rgbs, n) => {
@@ -80,21 +84,23 @@ export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxU
   this.draw = () => {
     /* Draws the abstract background for the galaxy from sampled RGB values. */
 
+    const targetRadius = this.width / 2 * this.targetPercent / 2 // The radius of the actionable center of the galaxy
+
     this.ctxBg.save();
     // Create the gradient
     const radgrad = this.ctxBg.createRadialGradient(
       this.coords.x,
       this.coords.y,
-      this.width / (this.width / 2),
+      targetRadius,
       this.coords.x,
       this.coords.y,
       this.height / 2
     );
     // Apply the sampled RGBs to the gradient
     radgrad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
-    radgrad.addColorStop(0.2, `rgba(${this.rgbs[0]}, 0.7)`);
-    radgrad.addColorStop(0.4, `rgba(${this.rgbs[1]}, 0.3)`);
-    radgrad.addColorStop(0.5, `rgba(${this.rgbs[2]}, 0.2)`);
+    radgrad.addColorStop(this.targetPercent, `rgba(${this.rgbs[0]}, 0.7)`);
+    radgrad.addColorStop(0.4, `rgba(${this.rgbs[1]}, 0.5)`);
+    radgrad.addColorStop(0.6, `rgba(${this.rgbs[2]}, 0.3)`);
     radgrad.addColorStop(1, "rgba(0, 0, 0, 0)");
 
     // Draw the gradient
@@ -107,9 +113,15 @@ export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxU
       this.height
     );
     this.ctxBg.fill(path);
-    this.targetArea = path
-
+    this.path = path
     this.ctxBg.restore();
+
+    // Create the target area path around the core of the galaxy.
+    // This is the user's entry point into the galaxy.
+    this.ctxUser.save()
+    this.targetPath = new Path2D()
+    this.targetPath.arc(this.coords.x, this.coords.y, targetRadius, 0, 2 * Math.PI);
+    this.ctxUser.restore()
   }
 
   this.handleMouseOver = () => {

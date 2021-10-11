@@ -5,9 +5,10 @@
       "x": 721,
       "y": 721
     },
-    "width": 300,
-    "height": 200,
+    "width": 200,
+    "height": 100,
     "repCoin": {
+      "id": 7,
       "rank": 7,
       "name": "solana",
       "symbol": "SOL",
@@ -23,6 +24,7 @@
     "width": 500,
     "height": 300,
     "repCoin": {
+      "id": 1,
       "rank": 1,
       "name": "bitcoin",
       "symbol": "BTC",

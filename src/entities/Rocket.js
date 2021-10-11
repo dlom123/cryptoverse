@@ -1,3 +1,4 @@
+import store from '../store'
 import { degreesToRadians, round } from "../functions/helpers"
 
 export default function Rocket(ctx, x = 0, y = 0) {
@@ -15,6 +16,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.maxSpeed = 5;
   this.boostPower = 0.2; // Acceleration increment
   this.steering = 5; // Rotation sensitivity
+  this.galaxy = null // The galaxy that the rocket is currently in
 
   this.spawn = () => {
     /* Loads the rocket image and spawns it on the screen. */
@@ -133,6 +135,9 @@ export default function Rocket(ctx, x = 0, y = 0) {
     // Apply rocket state changes
     this.update()
 
+    // Detect collisions
+    this.handleCollisions()
+
     // Draw updated rocket
     this.draw()
 
@@ -173,8 +178,33 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.stop = () => {
     /* Places the rocket in an idle state. */
 
+    this.speed = 0
+
     // Stop applying animations while the rocket is not moving
     cancelAnimationFrame(this.raf)
+  }
+
+  this.handleCollisions = () => {
+    /* Handles rocket Cryptoverse interactions. */
+
+    // Check if the rocket has entered a galaxy
+    const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
+      ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
+    )
+    if (rocketInGalaxies.length && !this.galaxy) {
+      // Rocket has entered a galaxy.
+      this.galaxy = rocketInGalaxies.pop()
+      // Show cryptoid details for the Galaxy's representative cryptoid (for now).
+      // TODO: Enter galaxy view instead of showing cryptoid details.
+      store.commit('setShowCryptoidDetail', this.galaxy.repCoin)
+
+      // Bring the rocket to a halt
+      this.stop()
+    } else if (!rocketInGalaxies.length && this.galaxy) {
+      // Rocket has left the galaxy
+      this.galaxy = null
+      store.commit('setShowCryptoidDetail', null)
+    }
   }
 
   this.destroy = () => {
