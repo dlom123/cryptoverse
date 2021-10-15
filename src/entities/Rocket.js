@@ -3,7 +3,11 @@ import { degreesToRadians, round } from "../functions/helpers"
 
 export default function Rocket(ctx, x = 0, y = 0) {
   // Init variables
-  this.img = new Image();
+  this.image = {
+    small: new Image(),
+    large: new Image()
+  }
+  this.img = null
   this.raf; // Keep track of requestAnimationFrame()
   this.width = 0;
   this.height = 0;
@@ -16,17 +20,19 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.maxSpeed = 5;
   this.boostPower = 0.2; // Acceleration increment
   this.steering = 5; // Rotation sensitivity
-  this.galaxy = null // The galaxy that the rocket is currently in
 
   this.spawn = () => {
     /* Loads the rocket image and spawns it on the screen. */
-    const rocketImgFile = require.context(
+    const rocketImgFiles = require.context(
       "../assets/images/",
       false,
       /.png$/
-    )("./rocket.png")
-    this.img.src = rocketImgFile
-    this.img.onload = () => {
+    )
+    this.image.small.src = rocketImgFiles("./rocket-sm.png")
+    this.image.large.src = rocketImgFiles("./rocket-lg.png")
+    this.image.small.onload = () => {
+      // Default to the small rocket for the cryptoverse view
+      this.img = this.image.small
       this.width = this.img.width
       this.height = this.img.height
 
@@ -59,8 +65,8 @@ export default function Rocket(ctx, x = 0, y = 0) {
       this.img,
       this.position.x - this.width / 2,
       this.position.y - this.height / 2,
-      this.width,
-      this.height
+      this.img.width,
+      this.img.height
     )
     ctx.restore() // Put the canvas back how we found it
   }
@@ -69,24 +75,10 @@ export default function Rocket(ctx, x = 0, y = 0) {
     /*
       Sets the rocket's new position based on current position,
       rotation, and speed.
-      
-      Wraps the rocket around the screen when it goes out of bounds.
     */
     const rotationRadians = degreesToRadians(this.rotation);
     this.position.x += Math.sin(rotationRadians) * this.speed;
     this.position.y += -Math.cos(rotationRadians) * this.speed;
-
-    // Wrap around at edge of screen
-    if (this.position.x > ctx.canvas.width) {
-      this.position.x = 0;
-    } else if (this.position.y < 0) {
-      this.position.y = ctx.canvas.height;
-    }
-    if (this.position.y > ctx.canvas.height) {
-      this.position.y = 0;
-    } else if (this.position.x < 0) {
-      this.position.x = ctx.canvas.width;
-    }
   }
 
   this.handleKeyboard = (event) => {
@@ -147,7 +139,9 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.turn = (degrees) => {
     /* Applies rotation to the rocket. */
-    this.rotation += degrees;
+
+    // Keep the angle within the range of positive 0-360
+    this.rotation = (((this.rotation + degrees) % 360) + 360) % 360;
 
     // If the rocket is not moving, apply the update manually
     // since animations are not being tracked
@@ -187,24 +181,120 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.handleCollisions = () => {
     /* Handles rocket Cryptoverse interactions. */
 
-    // Check if the rocket has entered a galaxy
-    const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
-      ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
-    )
-    if (rocketInGalaxies.length && !this.galaxy) {
-      // Rocket has entered a galaxy.
-      this.galaxy = rocketInGalaxies.pop()
-      // Show cryptoid details for the Galaxy's representative cryptoid (for now).
-      // TODO: Enter galaxy view instead of showing cryptoid details.
-      store.commit('setShowCryptoidDetail', this.galaxy.repCoin)
+    if (!store.state.currentGalaxy) {
+      // The rocket is not currently in a galaxy -- check if it has entered a galaxy
+      const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
+        ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
+      )
+      if (rocketInGalaxies.length && !store.state.currentGalaxy) {
+        // Rocket has entered a galaxy.
+        this.enterGalaxy(rocketInGalaxies.pop())
+      }
 
-      // Bring the rocket to a halt
-      this.stop()
-    } else if (!rocketInGalaxies.length && this.galaxy) {
-      // Rocket has left the galaxy
-      this.galaxy = null
-      store.commit('setShowCryptoidDetail', null)
+      // Wrap around at edge of screen
+      const isOutOfBounds = this.isOutOfBounds()
+      if (isOutOfBounds) {
+        if (isOutOfBounds.x > ctx.canvas.width) {
+          // Out of bounds at the right edge
+          this.position.x = 0;
+        } else if (isOutOfBounds.y < 0) {
+          // Out of bounds at the top edge
+          this.position.y = ctx.canvas.height;
+        }
+        if (isOutOfBounds.y > ctx.canvas.height) {
+          // Out of bounds at the bottom edge
+          this.position.y = 0;
+        } else if (isOutOfBounds.x < 0) {
+          // Out of bounds at the left edge
+          this.position.x = ctx.canvas.width;
+        }
+      }
     }
+    else {
+      // The rocket is currently in a galaxy -- check if it has left the galaxy
+      if (this.isOutOfBounds()) {
+        this.leaveGalaxy()
+      }
+    }
+  }
+
+  this.enterGalaxy = (galaxy) => {
+    /* Handles the rocket entering a galaxy. */
+    console.log(`Entering the ${galaxy.name} galaxy...`)
+
+    // Bring the rocket to a halt
+    this.stop()
+
+    // Enter galaxy view
+    store.commit('setCurrentGalaxy', galaxy)
+
+    // Use the large rocket image for the zoomed-in galaxy view
+    this.changeImage(this.image.large)
+
+    // Move rocket near the edge of the screen on the side it entered
+    if (this.rotation >= 45 && this.rotation <= 135) {
+      // Entering from the left -- position the rocket accordingly
+      this.position.x = 0 + this.width // One rocket's width in from the edge
+      this.position.y = ctx.canvas.height / 2
+      this.rotation = 90
+    } else if (this.rotation > 135 && this.rotation < 225) {
+      // Entering from the top -- position the rocket accordingly
+      this.position.x = ctx.canvas.width / 2
+      this.position.y = 0 + (this.height / 2) // One rocket's width in from the edge
+      this.rotation = 180
+    } else if (this.rotation >= 225 && this.rotation <= 315) {
+      // Entering from the right -- position the rocket accordingly
+      this.position.x = ctx.canvas.width - (this.width * 2) // Two rockets' width in from the edge
+      this.position.y = ctx.canvas.height / 2
+      this.rotation = 270
+    } else if (this.rotation > 315 || this.rotation < 45) {
+      // Entering from the bottom -- position the rocket accordingly
+      this.position.x = ctx.canvas.width / 2
+      this.position.y = ctx.canvas.height - (this.height / 2) // One rocket's height in from the edge
+      this.rotation = 0
+    }
+  }
+
+  this.leaveGalaxy = () => {
+    /* Handles the rocket leaving a galaxy. */
+    console.log(`Leaving the ${store.state.currentGalaxy.name} galaxy...`)
+
+    // Bring the rocket to a halt
+    this.stop()
+
+    // Leave galaxy view -- return to cryptoverse view
+    const galaxy = store.state.currentGalaxy // preserve the galaxy that was exited for later use
+    store.commit('setCurrentGalaxy', null)
+
+    // Use the small rocket image for the cryptoverse view
+    this.changeImage(this.image.small)
+    console.log(this)
+
+    // Position the rocket at the center of the galaxy it has just left, angled in the direction it exited
+    console.log('returning rocket to center of galaxy', galaxy.x, galaxy.y)
+    this.position.x = galaxy.coords.x
+    this.position.y = galaxy.coords.y
+  }
+
+  this.isOutOfBounds = () => {
+    /* Returns the rocket's x,y coordinates if it is out of bounds, otherwise `false`. */
+
+    return (this.position.x > ctx.canvas.width
+      || this.position.y < 0
+      || this.position.y > ctx.canvas.height
+      || this.position.x < 0)
+      ? { x: this.position.x, y: this.position.y }
+      : false
+  }
+
+  this.changeImage = (img) => {
+    /* Changes the image used to represent the rocket and adjusts width and height accordingly. */
+
+    const d = new Date()
+    img.src = `${img.src}?${d.getMilliseconds()}`
+    this.img = img
+    this.width = img.width
+    this.height = img.height
   }
 
   this.destroy = () => {

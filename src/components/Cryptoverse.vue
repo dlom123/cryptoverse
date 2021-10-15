@@ -1,18 +1,25 @@
 <template>
-  <v-col id="cryptoverse" class="ma-0 pa-0">
-    <canvas ref="bg-canvas" class="canvas">
-      <!-- the canvas used for the non-interactive backdrop (bottom-most) -->
-      HTML5 Canvas is not supported in your browser.
-    </canvas>
-    <canvas ref="animation-canvas" class="canvas">
-      <!-- the canvas used for animations -->
-    </canvas>
-    <canvas ref="user-canvas" class="canvas">
-      <!-- the canvas used for user interactions (top-most) -->
-    </canvas>
+  <v-container
+    fluid
+    :class="['main-container', 'pa-0', 'ma-0', 'fill-height', viewClass]"
+  >
+    <v-row no-gutters class="fill-height">
+      <v-col id="cryptoverse" class="ma-0 pa-0">
+        <canvas ref="bg-canvas" class="canvas">
+          <!-- the canvas used for the non-interactive backdrop (bottom-most) -->
+          HTML5 Canvas is not supported in your browser.
+        </canvas>
+        <canvas ref="animation-canvas" class="canvas">
+          <!-- the canvas used for animations -->
+        </canvas>
+        <canvas ref="user-canvas" class="canvas">
+          <!-- the canvas used for user interactions (top-most) -->
+        </canvas>
 
-    <CryptoidDetails />
-  </v-col>
+        <CryptoidDetails />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -44,12 +51,18 @@ export default {
     };
   },
   computed: {
-    ...mapState(["galaxies"]),
+    ...mapState(["currentGalaxy", "galaxies"]),
     canvasHeight() {
       return this.$refs["bg-canvas"].parentElement.clientHeight;
     },
     canvasWidth() {
       return this.$refs["bg-canvas"].parentElement.clientWidth;
+    },
+    viewClass() {
+      return {
+        cryptoverse: !this.currentGalaxy,
+        galaxy: this.currentGalaxy,
+      };
     },
   },
   methods: {
