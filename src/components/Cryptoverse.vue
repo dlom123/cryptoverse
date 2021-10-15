@@ -15,8 +15,6 @@
         <canvas ref="user-canvas" class="canvas">
           <!-- the canvas used for user interactions (top-most) -->
         </canvas>
-
-        <CryptoidDetails />
       </v-col>
     </v-row>
   </v-container>
@@ -24,16 +22,13 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
-import CryptoidDetails from "@/components/CryptoidDetails";
+import store from "@/store";
 import { Cryptoid, Galaxy, Rocket } from "@/entities";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
 export default {
   name: "Canvas",
-  components: {
-    CryptoidDetails,
-  },
   data() {
     return {
       cryptoids: [],
@@ -48,6 +43,7 @@ export default {
         galaxies: [],
       },
       rocket: null,
+      unsubscribe: null,
     };
   },
   computed: {
@@ -69,8 +65,25 @@ export default {
     ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
     createCryptoverse() {
       /* Create and populate the entire Cryptoverse */
+
+      // Clear away any background items
+      const ctxBg = this.provider.bgContext;
+      ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+
       this.plotGalaxies();
       // this.loadCryptoids(); // Not doing this at the moment
+    },
+    handleSceneChange(galaxy) {
+      const ctxBg = this.provider.bgContext;
+      if (!galaxy) {
+        // Show the entire cryptoverse
+        ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+        this.createCryptoverse();
+      } else {
+        // Show the galaxy view
+        // Clear away any background items
+        ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+      }
     },
     loadCryptoids() {
       allCryptoids.forEach((coin) => {
@@ -206,6 +219,14 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
+
+    // Subscribe to state mutations
+    this.unsubscribe = store.subscribe((mutation, state) => {
+      if (mutation.type === "setCurrentGalaxy") {
+        // Handle scene changes when the current galaxy is changed
+        this.handleSceneChange(mutation.payload); // Pass along the current galaxy, if any
+      }
+    });
   },
   beforeDestroy() {
     this.provider.userContext.canvas.removeEventListener(
@@ -217,6 +238,9 @@ export default {
       this.onMouseMoveCanvas
     );
     this.rocket.destroy();
+
+    // Unsubscribe from mutations
+    this.unsubscribe();
   },
 };
 </script>
