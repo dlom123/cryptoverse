@@ -1,4 +1,7 @@
 export default {
+  setCryptoids: (state, payload) => {
+    state.cryptoids = payload
+  },
   setCurrentGalaxy: (state, payload) => {
     state.currentGalaxy = payload
   },

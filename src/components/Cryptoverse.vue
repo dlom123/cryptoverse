@@ -31,7 +31,6 @@ export default {
   name: "Canvas",
   data() {
     return {
-      cryptoids: [],
       isMouseOverCryptoid: false,
       isMouseOverGalaxy: false,
       provider: {
@@ -62,41 +61,35 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
+    ...mapMutations(["setCryptoids", "setGalaxies", "setShowCryptoidDetail"]),
     createCryptoverse() {
-      /* Create and populate the entire Cryptoverse */
+      /* Creates and populates the entire Cryptoverse. */
 
       // Clear away any background items
       const ctxBg = this.provider.bgContext;
       ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
 
       this.plotGalaxies();
-      // this.loadCryptoids(); // Not doing this at the moment
+    },
+    createGalaxy() {
+      /* Creates and populates the current galaxy. */
+
+      // Clear away any background items
+      const ctxBg = this.provider.bgContext;
+      ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+
+      this.plotCryptoids();
     },
     handleSceneChange(galaxy) {
-      const ctxBg = this.provider.bgContext;
+      /* Changes scenes. */
+
       if (!galaxy) {
         // Show the entire cryptoverse
-        ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
         this.createCryptoverse();
       } else {
         // Show the galaxy view
-        // Clear away any background items
-        ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+        this.createGalaxy();
       }
-    },
-    loadCryptoids() {
-      allCryptoids.forEach((coin) => {
-        const cryptoid = new Cryptoid(
-          this.provider.bgContext,
-          this.provider.userContext,
-          coin
-        );
-        cryptoid.load();
-
-        // Maintain an array of all existing cryptoids
-        this.cryptoids.push(cryptoid);
-      });
     },
     onClickCanvas(e) {
       const ctxUser = this.provider.userContext;
@@ -118,24 +111,26 @@ export default {
     onMouseMoveCanvas(e) {
       const ctxUser = this.provider.userContext;
 
-      // Is the mouse over any of the cryptoids?
-      const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
-      this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
-        ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
-      );
-      if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
-        this.isMouseOverCryptoid = true;
-        this.mouseIsOver.cryptoids.forEach((cryptoid) => {
-          cryptoid.handleMouseOver();
-        });
-      } else if (
-        !this.mouseIsOver.cryptoids.length &&
-        this.isMouseOverCryptoid
-      ) {
-        this.isMouseOverCryptoid = false;
-        previousMouseOverCryptoids.forEach((cryptoid) => {
-          cryptoid.handleMouseOut();
-        });
+      if (this.currentGalaxy) {
+        // Is the mouse over any of the cryptoids?
+        const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
+        this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
+          ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+        );
+        if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
+          this.isMouseOverCryptoid = true;
+          this.mouseIsOver.cryptoids.forEach((cryptoid) => {
+            cryptoid.handleMouseOver();
+          });
+        } else if (
+          !this.mouseIsOver.cryptoids.length &&
+          this.isMouseOverCryptoid
+        ) {
+          this.isMouseOverCryptoid = false;
+          previousMouseOverCryptoids.forEach((cryptoid) => {
+            cryptoid.handleMouseOut();
+          });
+        }
       }
 
       // Is the mouse over any of the galaxies?
@@ -158,11 +153,35 @@ export default {
         });
       }
     },
+    plotCryptoids() {
+      /* Places each cryptoid in its position within the galaxy. */
+
+      const cryptoids = [];
+      const galaxyCryptoids = allCryptoids.filter(
+        (c) => c.galaxyId === this.currentGalaxy.id
+      );
+      galaxyCryptoids.forEach((coin) => {
+        const cryptoid = new Cryptoid(
+          this.provider.bgContext,
+          this.provider.userContext,
+          coin
+        );
+        cryptoid.load();
+
+        // Build an array of cryptoid objects
+        cryptoids.push(cryptoid);
+      });
+
+      this.setCryptoids(cryptoids);
+    },
     plotGalaxies() {
+      /* Places each galaxy in its position within the cryptoverse. */
+
       const galaxies = [];
       // Create the bounding area for each galaxy
       allGalaxies.forEach((g) => {
         const galaxy = new Galaxy(
+          g.id,
           g.name,
           g.coords, // center of galaxy
           g.width,
@@ -173,7 +192,7 @@ export default {
         );
         galaxy.generate();
 
-        // Maintain an array of all existing galaxies
+        // Build an array of galaxy objects
         galaxies.push(galaxy);
       });
 

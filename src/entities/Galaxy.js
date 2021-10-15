@@ -1,7 +1,8 @@
 import { getImgRGBs } from "../functions/helpers"
 
-export default function Galaxy(name, coords, width, height, repCoin, ctxBg, ctxUser) {
+export default function Galaxy(id, name, coords, width, height, repCoin, ctxBg, ctxUser) {
   // Init variables
+  this.id = id
   this.name = name
   this.coords = { // Center of the galaxy
     x: coords.x,

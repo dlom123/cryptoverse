@@ -1,5 +1,40 @@
 [
   {
+    "id": 1,
+    "name": "Alpha Satoshi",
+    "coords": {
+      "x": 258,
+      "y": 158
+    },
+    "width": 500,
+    "height": 300,
+    "repCoin": {
+      "id": 1,
+      "rank": 1,
+      "name": "bitcoin",
+      "symbol": "BTC",
+      "filename": "bitcoin.png"
+    }
+  },
+  {
+    "id": 2,
+    "name": "dApptonia",
+    "coords": {
+      "x": 1100,
+      "y": 600
+    },
+    "width": 350,
+    "height": 200,
+    "repCoin": {
+      "id": 2,
+      "rank": 2,
+      "name": "ethereum",
+      "symbol": "ETH",
+      "filename": "ethereum.png"
+    }
+  },
+  {
+    "id": 3,
     "name": "The NFT Way",
     "coords": {
       "x": 721,
@@ -16,19 +51,20 @@
     }
   },
   {
-    "name": "Alpha Satoshi",
+    "id": 4,
+    "name": "Stable IV",
     "coords": {
-      "x": 258,
-      "y": 158
+      "x": 100,
+      "y": 700
     },
-    "width": 500,
-    "height": 300,
+    "width": 240,
+    "height": 110,
     "repCoin": {
-      "id": 1,
-      "rank": 1,
-      "name": "bitcoin",
-      "symbol": "BTC",
-      "filename": "bitcoin.png"
+      "id": 4,
+      "rank": 4,
+      "name": "tether",
+      "symbol": "USDT",
+      "filename": "tether.png"
     }
   }
 ]
