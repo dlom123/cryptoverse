@@ -181,17 +181,32 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.handleCollisions = () => {
     /* Handles rocket Cryptoverse interactions. */
 
+    // In the cryptoverse, not in a galaxy
+    //   - currentGalaxy = null
+    //   - inGalaxyPath = false
+    // In the cryptoverse, entering a galaxy
+    //   - currentGalaxy = null
+    //   - inGalaxyPath = true
+    // In a galaxy
+    //   - currentGalaxy = galaxy
+    //   - inGalaxyPath = false
+    // In the cryptoverse, leaving a galaxy
+    //   - currentGalaxy = galaxy
+    //   - inGalaxyPath = true
+
     if (!store.state.currentGalaxy) {
-      // The rocket is not currently in a galaxy -- check if it has entered a galaxy
+      // The rocket is in the cryptoverse
+
+      // Check whether the rocket has entered a galaxy
       const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
         ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
       )
-      if (rocketInGalaxies.length && !store.state.currentGalaxy) {
+      if (rocketInGalaxies.length) {
         // Rocket has entered a galaxy.
         this.enterGalaxy(rocketInGalaxies.pop())
       }
 
-      // Wrap around at edge of screen
+      // Wrap around at edge of screen when the rocket goes out of bounds while in the cryptoverse
       const isOutOfBounds = this.isOutOfBounds()
       if (isOutOfBounds) {
         if (isOutOfBounds.x > ctx.canvas.width) {
