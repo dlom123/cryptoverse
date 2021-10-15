@@ -16,6 +16,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.rotation = 0; // Degrees
   this.speed = 0;
   this.pressedKeys = {};
+  this.isLeavingGalaxy = false
   // Rocket settings
   this.maxSpeed = 5;
   this.boostPower = 0.2; // Acceleration increment
@@ -181,19 +182,6 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.handleCollisions = () => {
     /* Handles rocket Cryptoverse interactions. */
 
-    // In the cryptoverse, not in a galaxy
-    //   - currentGalaxy = null
-    //   - inGalaxyPath = false
-    // In the cryptoverse, entering a galaxy
-    //   - currentGalaxy = null
-    //   - inGalaxyPath = true
-    // In a galaxy
-    //   - currentGalaxy = galaxy
-    //   - inGalaxyPath = false
-    // In the cryptoverse, leaving a galaxy
-    //   - currentGalaxy = galaxy
-    //   - inGalaxyPath = true
-
     if (!store.state.currentGalaxy) {
       // The rocket is in the cryptoverse
 
@@ -201,9 +189,17 @@ export default function Rocket(ctx, x = 0, y = 0) {
       const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
         ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
       )
-      if (rocketInGalaxies.length) {
-        // Rocket has entered a galaxy.
-        this.enterGalaxy(rocketInGalaxies.pop())
+      if (!this.isLeavingGalaxy) {
+        if (rocketInGalaxies.length) {
+          // Rocket has entered a galaxy.
+          this.enterGalaxy(rocketInGalaxies.pop())
+        }
+      } else {
+        // Rocket has just left a galaxy
+        if (!rocketInGalaxies.length) {
+          // Rocket left the galaxy's target path
+          this.isLeavingGalaxy = false
+        }
       }
 
       // Wrap around at edge of screen when the rocket goes out of bounds while in the cryptoverse
@@ -226,7 +222,9 @@ export default function Rocket(ctx, x = 0, y = 0) {
       }
     }
     else {
-      // The rocket is currently in a galaxy -- check if it has left the galaxy
+      // The rocket is in a galaxy
+      
+      // Check whether the has left the galaxy
       if (this.isOutOfBounds()) {
         this.leaveGalaxy()
       }
@@ -235,7 +233,6 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.enterGalaxy = (galaxy) => {
     /* Handles the rocket entering a galaxy. */
-    console.log(`Entering the ${galaxy.name} galaxy...`)
 
     // Bring the rocket to a halt
     this.stop()
@@ -272,8 +269,9 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.leaveGalaxy = () => {
     /* Handles the rocket leaving a galaxy. */
-    console.log(`Leaving the ${store.state.currentGalaxy.name} galaxy...`)
 
+    this.isLeavingGalaxy = true
+  
     // Bring the rocket to a halt
     this.stop()
 
@@ -283,10 +281,8 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
     // Use the small rocket image for the cryptoverse view
     this.changeImage(this.image.small)
-    console.log(this)
 
     // Position the rocket at the center of the galaxy it has just left, angled in the direction it exited
-    console.log('returning rocket to center of galaxy', galaxy.x, galaxy.y)
     this.position.x = galaxy.coords.x
     this.position.y = galaxy.coords.y
   }
