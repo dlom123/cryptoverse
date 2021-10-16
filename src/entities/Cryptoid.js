@@ -1,11 +1,11 @@
 import { getRandomNumber } from "../functions/helpers";
 
-export default function Cryptoid(ctxBg, ctxUser, coin) {
+export default function Cryptoid(ctxBg, ctxUser, name, symbol, filename) {
   this.ctxBg = ctxBg // Background canvas context
   this.ctxUser = ctxUser // User interaction canvas context
-  this.name = coin.name
-  this.symbol = coin.symbol
-  this.filename = coin.filename
+  this.name = name
+  this.symbol = symbol
+  this.filename = filename
   this.img = new Image()
   this.radius = getRandomNumber(5, 64); // Generate cryptoid size randomly for now
   this.coords = { // Center of cryptoid
@@ -24,8 +24,8 @@ export default function Cryptoid(ctxBg, ctxUser, coin) {
   }
 
   this.loadImage = async () => {
-    const coinImgFile = require.context("../assets/images/cryptoids", false, /.png$/)(`./${this.filename}`);
-    this.img.src = coinImgFile;
+    const cryptoidImgFile = require.context("../assets/images/cryptoids", false, /.png$/)(`./${this.filename}`);
+    this.img.src = cryptoidImgFile;
     await this.img.decode() // After this, the image is loaded and ready
   }
 

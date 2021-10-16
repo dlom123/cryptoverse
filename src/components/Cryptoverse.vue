@@ -23,7 +23,7 @@
 <script>
 import { mapMutations, mapState } from "vuex";
 import store from "@/store";
-import { Cryptoid, Galaxy, Rocket } from "@/entities";
+import { Galaxy, Rocket, System } from "@/entities";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
@@ -61,7 +61,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setCryptoids", "setGalaxies", "setShowCryptoidDetail"]),
+    ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -78,7 +78,26 @@ export default {
       const ctxBg = this.provider.bgContext;
       ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
 
-      this.plotCryptoids();
+      // Collect the cryptoids that belong to this system
+      const galaxyCryptoids = allCryptoids.filter(
+        (c) => c.galaxyId === this.currentGalaxy.id
+      );
+
+      // Draw the galaxy's system
+      const system = new System(
+        {
+          animation: this.provider.animationContext,
+          bg: this.provider.bgContext,
+          user: this.provider.userContext,
+        },
+        this.currentGalaxy.id,
+        this.currentGalaxy.name,
+        this.currentGalaxy.repCoin,
+        galaxyCryptoids
+      );
+      system.generate();
+
+      // this.plotCryptoids();
     },
     handleSceneChange(galaxy) {
       /* Changes scenes. */
@@ -152,27 +171,6 @@ export default {
           galaxy.handleMouseOut();
         });
       }
-    },
-    plotCryptoids() {
-      /* Places each cryptoid in its position within the galaxy. */
-
-      const cryptoids = [];
-      const galaxyCryptoids = allCryptoids.filter(
-        (c) => c.galaxyId === this.currentGalaxy.id
-      );
-      galaxyCryptoids.forEach((coin) => {
-        const cryptoid = new Cryptoid(
-          this.provider.bgContext,
-          this.provider.userContext,
-          coin
-        );
-        cryptoid.load();
-
-        // Build an array of cryptoid objects
-        cryptoids.push(cryptoid);
-      });
-
-      this.setCryptoids(cryptoids);
     },
     plotGalaxies() {
       /* Places each galaxy in its position within the cryptoverse. */
