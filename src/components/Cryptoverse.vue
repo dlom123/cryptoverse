@@ -216,7 +216,7 @@ export default {
     });
 
     // Draw the Cryptoverse!
-    this.createCryptoverse();
+    // this.createCryptoverse();
 
     // Register event handlers
     this.provider.userContext.canvas.addEventListener(
@@ -244,6 +244,8 @@ export default {
         this.handleSceneChange(mutation.payload); // Pass along the current galaxy, if any
       }
     });
+        // store.commit('setCurrentGalaxy', this.galaxies[0])
+        this.rocket.enterGalaxy(this.galaxies[0])
   },
   beforeDestroy() {
     this.provider.userContext.canvas.removeEventListener(
