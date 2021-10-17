@@ -15,6 +15,8 @@
         <canvas ref="user-canvas" class="canvas">
           <!-- the canvas used for user interactions (top-most) -->
         </canvas>
+
+        <CryptoidDetails />
       </v-col>
     </v-row>
   </v-container>
@@ -22,13 +24,17 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
-import store from "@/store";
+import store from "@/store"
 import { Galaxy, Rocket, System } from "@/entities";
+import CryptoidDetails from "@/components/CryptoidDetails";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
 export default {
   name: "Canvas",
+  components: {
+    CryptoidDetails
+  },
   data() {
     return {
       isMouseOverCryptoid: false,
@@ -61,7 +67,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
+    ...mapMutations(["setGalaxies", "setCurrentCryptoid"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -96,8 +102,6 @@ export default {
         galaxyCryptoids
       );
       system.generate();
-
-      // this.plotCryptoids();
     },
     handleSceneChange(galaxy) {
       /* Changes scenes. */
@@ -123,7 +127,7 @@ export default {
           console.log("Leeloo Dallas multi-click!", clickedCryptoids);
         } else {
           // A single cryptoid was clicked. Display its details.
-          this.setShowCryptoidDetail(clickedCryptoid);
+          this.setCurrentCryptoid(clickedCryptoid);
         }
       }
     },
@@ -155,8 +159,7 @@ export default {
       // Is the mouse over any of the galaxies?
       const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
       this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
-        if (galaxy.path) {
-          // Make sure the galaxy has fully loaded its path
+        if (galaxy.path) { // Make sure the galaxy has fully loaded its path
           return ctxUser.isPointInPath(galaxy.path, e.pageX, e.pageY);
         }
       });

@@ -8,9 +8,9 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     cryptoids: [],
+    currentCryptoid: null,
     currentGalaxy: null,
     galaxies: [],
-    showCryptoidDetail: null
   },
   mutations,
   actions,

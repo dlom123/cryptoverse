@@ -3,6 +3,7 @@ import { degreesToRadians, round } from "../functions/helpers"
 
 export default function Rocket(ctx, x = 0, y = 0) {
   // Init variables
+  this.ctx = ctx
   this.image = {
     small: new Image(),
     large: new Image()
@@ -16,6 +17,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.rotation = 0; // Degrees
   this.speed = 0;
   this.pressedKeys = {};
+  this.isLeavingCryptoid = false
   this.isLeavingGalaxy = false
   // Rocket settings
   this.maxSpeed = 5;
@@ -50,26 +52,26 @@ export default function Rocket(ctx, x = 0, y = 0) {
     /* Draws the rocket at its current coordinates and rotation. */
 
     // Clear the previous animation frame to be redrawn
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
     // Apply changes to rocket state
     this.update()
 
     // Apply any rotation from turning the rocket
-    ctx.save()
-    ctx.translate(this.position.x, this.position.y)
-    ctx.rotate(degreesToRadians(this.rotation))
-    ctx.translate(-this.position.x, -this.position.y)
+    this.ctx.save()
+    this.ctx.translate(this.position.x, this.position.y)
+    this.ctx.rotate(degreesToRadians(this.rotation))
+    this.ctx.translate(-this.position.x, -this.position.y)
 
     // Draw the rocket to the screen
-    ctx.drawImage(
+    this.ctx.drawImage(
       this.img,
       this.position.x - this.width / 2,
       this.position.y - this.height / 2,
       this.img.width,
       this.img.height
     )
-    ctx.restore() // Put the canvas back how we found it
+    this.ctx.restore() // Put the canvas back how we found it
   }
 
   this.update = () => {
@@ -187,11 +189,11 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
       // Check whether the rocket has entered a galaxy
       const rocketInGalaxies = store.state.galaxies.filter(galaxy =>
-        ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
+        this.ctx.isPointInPath(galaxy.targetPath, this.position.x, this.position.y)
       )
       if (!this.isLeavingGalaxy) {
         if (rocketInGalaxies.length) {
-          // Rocket has entered a galaxy.
+          // Rocket has entered a galaxy
           this.enterGalaxy(rocketInGalaxies.pop())
         }
       } else {
@@ -205,28 +207,46 @@ export default function Rocket(ctx, x = 0, y = 0) {
       // Wrap around at edge of screen when the rocket goes out of bounds while in the cryptoverse
       const isOutOfBounds = this.isOutOfBounds()
       if (isOutOfBounds) {
-        if (isOutOfBounds.x > ctx.canvas.width) {
+        if (isOutOfBounds.x > this.ctx.canvas.width) {
           // Out of bounds at the right edge
           this.position.x = 0;
         } else if (isOutOfBounds.y < 0) {
           // Out of bounds at the top edge
-          this.position.y = ctx.canvas.height;
+          this.position.y = this.ctx.canvas.height;
         }
-        if (isOutOfBounds.y > ctx.canvas.height) {
+        if (isOutOfBounds.y > this.ctx.canvas.height) {
           // Out of bounds at the bottom edge
           this.position.y = 0;
         } else if (isOutOfBounds.x < 0) {
           // Out of bounds at the left edge
-          this.position.x = ctx.canvas.width;
+          this.position.x = this.ctx.canvas.width;
         }
       }
     }
     else {
       // The rocket is in a galaxy
       
-      // Check whether the has left the galaxy
+      // Check whether the rocket has left the galaxy
       if (this.isOutOfBounds()) {
         this.leaveGalaxy()
+      }
+      
+      // Check whether the rocket has entered a cryptoid
+      const rocketInCryptoid = store.state.cryptoids.filter((cryptoid) => {
+        if (cryptoid.targetPath) {
+          return this.ctx.isPointInPath(cryptoid.targetPath, this.position.x, this.position.y)
+        }
+        return null
+      });
+      if (!this.isLeavingCryptoid) {
+        if (rocketInCryptoid.length) {
+          // Rocket has entered a cryptoid
+          this.enterCryptoid(rocketInCryptoid.pop())
+        }
+      } else {
+        if (!rocketInCryptoid.length) {
+          this.leaveCryptoid()
+        }
       }
     }
   }
@@ -247,22 +267,22 @@ export default function Rocket(ctx, x = 0, y = 0) {
     if (this.rotation >= 45 && this.rotation <= 135) {
       // Entering from the left -- position the rocket accordingly
       this.position.x = 0 + this.width // One rocket's width in from the edge
-      this.position.y = ctx.canvas.height / 2
+      this.position.y = this.ctx.canvas.height / 2
       this.rotation = 90
     } else if (this.rotation > 135 && this.rotation < 225) {
       // Entering from the top -- position the rocket accordingly
-      this.position.x = ctx.canvas.width / 2
+      this.position.x = this.ctx.canvas.width / 2
       this.position.y = 0 + (this.height / 2) // One rocket's width in from the edge
       this.rotation = 180
     } else if (this.rotation >= 225 && this.rotation <= 315) {
       // Entering from the right -- position the rocket accordingly
-      this.position.x = ctx.canvas.width - (this.width * 2) // Two rockets' width in from the edge
-      this.position.y = ctx.canvas.height / 2
+      this.position.x = this.ctx.canvas.width - (this.width * 2) // Two rockets' width in from the edge
+      this.position.y = this.ctx.canvas.height / 2
       this.rotation = 270
     } else if (this.rotation > 315 || this.rotation < 45) {
       // Entering from the bottom -- position the rocket accordingly
-      this.position.x = ctx.canvas.width / 2
-      this.position.y = ctx.canvas.height - (this.height / 2) // One rocket's height in from the edge
+      this.position.x = this.ctx.canvas.width / 2
+      this.position.y = this.ctx.canvas.height - (this.height / 2) // One rocket's height in from the edge
       this.rotation = 0
     }
   }
@@ -287,12 +307,31 @@ export default function Rocket(ctx, x = 0, y = 0) {
     this.position.y = galaxy.coords.y
   }
 
+  this.enterCryptoid = (cryptoid) => {
+    /* Handles the rocket entering a cryptoid. */
+
+    // Stop the rocket
+    this.stop()
+
+    // Show the cryptoid's details
+    store.commit('setCurrentCryptoid', cryptoid)
+
+    this.isLeavingCryptoid = true
+  }
+
+  this.leaveCryptoid = () => {
+    /* Handles the rocket leaving a cryptoid. */
+
+    // Rocket has just left a cryptoid
+    this.isLeavingCryptoid = false
+  }
+
   this.isOutOfBounds = () => {
     /* Returns the rocket's x,y coordinates if it is out of bounds, otherwise `false`. */
 
-    return (this.position.x > ctx.canvas.width
+    return (this.position.x > this.ctx.canvas.width
       || this.position.y < 0
-      || this.position.y > ctx.canvas.height
+      || this.position.y > this.ctx.canvas.height
       || this.position.x < 0)
       ? { x: this.position.x, y: this.position.y }
       : false

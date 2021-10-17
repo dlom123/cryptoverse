@@ -10,7 +10,7 @@ export default function Cryptoid(ctxBg, ctxUser, coords, name, symbol, rank, fil
   this.img = new Image()
   this.radius = getRandomNumber(5, 25); // Generate cryptoid size randomly for now
   this.coords = coords
-  this.targetArea = null // The Path2D object that represents the virtual boundaries of the cryptoid
+  this.targetPath = null // The Path2D object that represents the virtual boundaries of the cryptoid
   this.fontSize = Math.max(this.radius / 2, 12);
 
   this.load = async () => {
@@ -40,8 +40,8 @@ export default function Cryptoid(ctxBg, ctxUser, coords, name, symbol, rank, fil
     // draw a circular border around the image
     this.ctxBg.strokeStyle = "rgba(173, 216, 230, 0.5)"; // lightblue
     this.ctxBg.lineWidth = 2;
-    this.targetArea = new Path2D();
-    this.targetArea.arc(
+    this.targetPath = new Path2D();
+    this.targetPath.arc(
       this.coords.x, // Center of the circle
       this.coords.y, // Center of the circle
       this.radius,
@@ -49,7 +49,7 @@ export default function Cryptoid(ctxBg, ctxUser, coords, name, symbol, rank, fil
       Math.PI * 2,
       false
     );
-    this.ctxBg.stroke(this.targetArea);
+    this.ctxBg.stroke(this.targetPath);
     this.ctxBg.restore();
   }
 

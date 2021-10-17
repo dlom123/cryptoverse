@@ -1,3 +1,4 @@
+import store from '../store'
 import { Cryptoid } from "../entities";
 import { getRandomNumber } from "../functions/helpers";
 
@@ -64,6 +65,9 @@ export default function System(ctx, id, name, repCoin, cryptoids) {
         
         return cryptoid
       });
+
+      // Set cryptoids in state
+      store.commit('setCryptoids', this.cryptoids)
   }
 
   this.plotCryptoids = () => {
