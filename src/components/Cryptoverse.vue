@@ -116,18 +116,21 @@ export default {
     },
     onClickCanvas(e) {
       const ctxUser = this.provider.userContext;
-      // Find out which cryptoids were clicked
-      const clickedCryptoids = this.cryptoids.filter((cryptoid) =>
-        ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
-      );
-      const clickedCryptoid = clickedCryptoids.pop();
-      if (clickedCryptoid) {
-        if (clickedCryptoids.length > 0) {
-          // Overlapping cryptoids were clicked.
-          console.log("Leeloo Dallas multi-click!", clickedCryptoids);
-        } else {
-          // A single cryptoid was clicked. Display its details.
-          this.setCurrentCryptoid(clickedCryptoid);
+
+      if (this.currentGalaxy) {
+        // Find out which cryptoids were clicked
+        const clickedCryptoids = this.cryptoids.filter((cryptoid) =>
+          ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+        );
+        const clickedCryptoid = clickedCryptoids.pop();
+        if (clickedCryptoid) {
+          if (clickedCryptoids.length > 0) {
+            // Overlapping cryptoids were clicked.
+            console.log("Leeloo Dallas multi-click!", clickedCryptoids);
+          } else {
+            // A single cryptoid was clicked. Display its details.
+            this.setCurrentCryptoid(clickedCryptoid);
+          }
         }
       }
     },
