@@ -225,12 +225,12 @@ export default function Rocket(ctx, x = 0, y = 0) {
     }
     else {
       // The rocket is in a galaxy
-      
+
       // Check whether the rocket has left the galaxy
       if (this.isOutOfBounds()) {
         this.leaveGalaxy()
       }
-      
+
       // Check whether the rocket has entered a cryptoid
       const rocketInCryptoid = store.state.cryptoids.filter((cryptoid) => {
         if (cryptoid.targetPath) {
@@ -253,7 +253,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.enterGalaxy = (galaxy) => {
     /* Handles the rocket entering a galaxy. */
-
+    console.log('haha why')
     // Bring the rocket to a halt
     this.stop()
 
@@ -291,7 +291,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
     /* Handles the rocket leaving a galaxy. */
 
     this.isLeavingGalaxy = true
-  
+
     // Bring the rocket to a halt
     this.stop()
 

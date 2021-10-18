@@ -24,7 +24,7 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
-import store from "@/store"
+import store from "@/store";
 import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
 import allGalaxies from "@/data/galaxies.json";
@@ -33,7 +33,7 @@ import allCryptoids from "@/data/cryptoids.json";
 export default {
   name: "Canvas",
   components: {
-    CryptoidDetails
+    CryptoidDetails,
   },
   data() {
     return {
@@ -159,7 +159,8 @@ export default {
       // Is the mouse over any of the galaxies?
       const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
       this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
-        if (galaxy.path) { // Make sure the galaxy has fully loaded its path
+        if (galaxy.path) {
+          // Make sure the galaxy has fully loaded its path
           return ctxUser.isPointInPath(galaxy.path, e.pageX, e.pageY);
         }
       });
@@ -219,7 +220,7 @@ export default {
     });
 
     // Draw the Cryptoverse!
-    // this.createCryptoverse();
+    this.createCryptoverse();
 
     // Register event handlers
     this.provider.userContext.canvas.addEventListener(
@@ -247,8 +248,6 @@ export default {
         this.handleSceneChange(mutation.payload); // Pass along the current galaxy, if any
       }
     });
-        // store.commit('setCurrentGalaxy', this.galaxies[0])
-        this.rocket.enterGalaxy(this.galaxies[0])
   },
   beforeDestroy() {
     this.provider.userContext.canvas.removeEventListener(
