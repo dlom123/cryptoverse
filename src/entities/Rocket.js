@@ -253,7 +253,7 @@ export default function Rocket(ctx, x = 0, y = 0) {
 
   this.enterGalaxy = (galaxy) => {
     /* Handles the rocket entering a galaxy. */
-    console.log('haha why')
+
     // Bring the rocket to a halt
     this.stop()
 
