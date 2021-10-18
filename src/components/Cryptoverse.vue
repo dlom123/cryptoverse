@@ -1,24 +1,32 @@
 <template>
-  <v-col id="cryptoverse" class="ma-0 pa-0">
-    <canvas ref="bg-canvas" class="canvas">
-      <!-- the canvas used for the non-interactive backdrop (bottom-most) -->
-      HTML5 Canvas is not supported in your browser.
-    </canvas>
-    <canvas ref="animation-canvas" class="canvas">
-      <!-- the canvas used for animations -->
-    </canvas>
-    <canvas ref="user-canvas" class="canvas">
-      <!-- the canvas used for user interactions (top-most) -->
-    </canvas>
+  <v-container
+    fluid
+    :class="['main-container', 'pa-0', 'ma-0', 'fill-height', viewClass]"
+  >
+    <v-row no-gutters class="fill-height">
+      <v-col id="cryptoverse" class="ma-0 pa-0">
+        <canvas ref="bg-canvas" class="canvas">
+          <!-- the canvas used for the non-interactive backdrop (bottom-most) -->
+          HTML5 Canvas is not supported in your browser.
+        </canvas>
+        <canvas ref="animation-canvas" class="canvas">
+          <!-- the canvas used for animations -->
+        </canvas>
+        <canvas ref="user-canvas" class="canvas">
+          <!-- the canvas used for user interactions (top-most) -->
+        </canvas>
 
-    <CryptoidDetails />
-  </v-col>
+        <CryptoidDetails />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import { mapMutations, mapState } from "vuex";
+import store from "@/store";
+import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
-import { Cryptoid, Galaxy, Rocket } from "@/entities";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
@@ -29,7 +37,6 @@ export default {
   },
   data() {
     return {
-      cryptoids: [],
       isMouseOverCryptoid: false,
       isMouseOverGalaxy: false,
       provider: {
@@ -41,36 +48,71 @@ export default {
         galaxies: [],
       },
       rocket: null,
+      unsubscribe: null,
     };
   },
   computed: {
-    ...mapState(["galaxies"]),
+    ...mapState(["currentGalaxy", "galaxies"]),
     canvasHeight() {
       return this.$refs["bg-canvas"].parentElement.clientHeight;
     },
     canvasWidth() {
       return this.$refs["bg-canvas"].parentElement.clientWidth;
     },
+    viewClass() {
+      return {
+        cryptoverse: !this.currentGalaxy,
+        galaxy: this.currentGalaxy,
+      };
+    },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setShowCryptoidDetail"]),
+    ...mapMutations(["setGalaxies", "setCurrentCryptoid"]),
     createCryptoverse() {
-      /* Create and populate the entire Cryptoverse */
-      this.plotGalaxies();
-      // this.loadCryptoids(); // Not doing this at the moment
-    },
-    loadCryptoids() {
-      allCryptoids.forEach((coin) => {
-        const cryptoid = new Cryptoid(
-          this.provider.bgContext,
-          this.provider.userContext,
-          coin
-        );
-        cryptoid.load();
+      /* Creates and populates the entire Cryptoverse. */
 
-        // Maintain an array of all existing cryptoids
-        this.cryptoids.push(cryptoid);
-      });
+      // Clear away any background items
+      const ctxBg = this.provider.bgContext;
+      ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+
+      this.plotGalaxies();
+    },
+    createGalaxy() {
+      /* Creates and populates the current galaxy. */
+
+      // Clear away any background items
+      const ctxBg = this.provider.bgContext;
+      ctxBg.clearRect(0, 0, ctxBg.canvas.width, ctxBg.canvas.height);
+
+      // Collect the cryptoids that belong to this system
+      const galaxyCryptoids = allCryptoids.filter(
+        (c) => c.galaxyId === this.currentGalaxy.id
+      );
+
+      // Draw the galaxy's system
+      const system = new System(
+        {
+          animation: this.provider.animationContext,
+          bg: this.provider.bgContext,
+          user: this.provider.userContext,
+        },
+        this.currentGalaxy.id,
+        this.currentGalaxy.name,
+        this.currentGalaxy.repCoin,
+        galaxyCryptoids
+      );
+      system.generate();
+    },
+    handleSceneChange(galaxy) {
+      /* Changes scenes. */
+
+      if (!galaxy) {
+        // Show the entire cryptoverse
+        this.createCryptoverse();
+      } else {
+        // Show the galaxy view
+        this.createGalaxy();
+      }
     },
     onClickCanvas(e) {
       const ctxUser = this.provider.userContext;
@@ -85,31 +127,33 @@ export default {
           console.log("Leeloo Dallas multi-click!", clickedCryptoids);
         } else {
           // A single cryptoid was clicked. Display its details.
-          this.setShowCryptoidDetail(clickedCryptoid);
+          this.setCurrentCryptoid(clickedCryptoid);
         }
       }
     },
     onMouseMoveCanvas(e) {
       const ctxUser = this.provider.userContext;
 
-      // Is the mouse over any of the cryptoids?
-      const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
-      this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
-        ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
-      );
-      if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
-        this.isMouseOverCryptoid = true;
-        this.mouseIsOver.cryptoids.forEach((cryptoid) => {
-          cryptoid.handleMouseOver();
-        });
-      } else if (
-        !this.mouseIsOver.cryptoids.length &&
-        this.isMouseOverCryptoid
-      ) {
-        this.isMouseOverCryptoid = false;
-        previousMouseOverCryptoids.forEach((cryptoid) => {
-          cryptoid.handleMouseOut();
-        });
+      if (this.currentGalaxy) {
+        // Is the mouse over any of the cryptoids?
+        const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
+        this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
+          ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+        );
+        if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
+          this.isMouseOverCryptoid = true;
+          this.mouseIsOver.cryptoids.forEach((cryptoid) => {
+            cryptoid.handleMouseOver();
+          });
+        } else if (
+          !this.mouseIsOver.cryptoids.length &&
+          this.isMouseOverCryptoid
+        ) {
+          this.isMouseOverCryptoid = false;
+          previousMouseOverCryptoids.forEach((cryptoid) => {
+            cryptoid.handleMouseOut();
+          });
+        }
       }
 
       // Is the mouse over any of the galaxies?
@@ -133,10 +177,13 @@ export default {
       }
     },
     plotGalaxies() {
+      /* Places each galaxy in its position within the cryptoverse. */
+
       const galaxies = [];
       // Create the bounding area for each galaxy
       allGalaxies.forEach((g) => {
         const galaxy = new Galaxy(
+          g.id,
           g.name,
           g.coords, // center of galaxy
           g.width,
@@ -147,7 +194,7 @@ export default {
         );
         galaxy.generate();
 
-        // Maintain an array of all existing galaxies
+        // Build an array of galaxy objects
         galaxies.push(galaxy);
       });
 
@@ -193,6 +240,14 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
+
+    // Subscribe to state mutations
+    this.unsubscribe = store.subscribe((mutation, state) => {
+      if (mutation.type === "setCurrentGalaxy") {
+        // Handle scene changes when the current galaxy is changed
+        this.handleSceneChange(mutation.payload); // Pass along the current galaxy, if any
+      }
+    });
   },
   beforeDestroy() {
     this.provider.userContext.canvas.removeEventListener(
@@ -204,6 +259,9 @@ export default {
       this.onMouseMoveCanvas
     );
     this.rocket.destroy();
+
+    // Unsubscribe from mutations
+    this.unsubscribe();
   },
 };
 </script>
