@@ -1,9 +1,5 @@
 <template>
-  <v-container fluid class="main-container pa-0 ma-0 fill-height">
-    <v-row no-gutters class="fill-height">
-      <Cryptoverse />
-    </v-row>
-  </v-container>
+  <Cryptoverse />
 </template>
 
 <script>

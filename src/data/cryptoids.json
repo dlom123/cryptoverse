@@ -1,6 +1,7 @@
 [
   {
     "id": 1,
+    "galaxyId": 1,
     "rank": 1,
     "name": "bitcoin",
     "symbol": "BTC",
@@ -8,6 +9,7 @@
   },
   {
     "id": 2,
+    "galaxyId": 2,
     "rank": 2,
     "name": "ethereum",
     "symbol": "ETH",
@@ -15,6 +17,7 @@
   },
   {
     "id": 3,
+    "galaxyId": 2,
     "rank": 3,
     "name": "cardano",
     "symbol": "ADA",
@@ -22,6 +25,7 @@
   },
   {
     "id": 4,
+    "galaxyId": 4,
     "rank": 4,
     "name": "tether",
     "symbol": "USDT",
@@ -29,6 +33,7 @@
   },
   {
     "id": 5,
+    "galaxyId": 2,
     "rank": 5,
     "name": "binance coin",
     "symbol": "BNB",
@@ -36,6 +41,7 @@
   },
   {
     "id": 6,
+    "galaxyId": 1,
     "rank": 6,
     "name": "xrp",
     "symbol": "XRP",
@@ -43,6 +49,7 @@
   },
   {
     "id": 7,
+    "galaxyId": 3,
     "rank": 7,
     "name": "solana",
     "symbol": "SOL",
@@ -50,6 +57,7 @@
   },
   {
     "id": 8,
+    "galaxyId": 4,
     "rank": 8,
     "name": "usd coin",
     "symbol": "USDC",
@@ -57,6 +65,7 @@
   },
   {
     "id": 9,
+    "galaxyId": 2,
     "rank": 9,
     "name": "polkadot",
     "symbol": "DOT",
@@ -64,6 +73,7 @@
   },
   {
     "id": 10,
+    "galaxyId": 1,
     "rank": 10,
     "name": "dogecoin",
     "symbol": "DOGE",
