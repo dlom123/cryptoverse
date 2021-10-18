@@ -52,7 +52,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["currentGalaxy", "galaxies"]),
+    ...mapState(["cryptoids", "currentGalaxy", "galaxies"]),
     canvasHeight() {
       return this.$refs["bg-canvas"].parentElement.clientHeight;
     },
@@ -120,7 +120,7 @@ export default {
       if (this.currentGalaxy) {
         // Find out which cryptoids were clicked
         const clickedCryptoids = this.cryptoids.filter((cryptoid) =>
-          ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+          ctxUser.isPointInPath(cryptoid.targetPath, e.pageX, e.pageY)
         );
         const clickedCryptoid = clickedCryptoids.pop();
         if (clickedCryptoid) {
@@ -138,10 +138,10 @@ export default {
       const ctxUser = this.provider.userContext;
 
       if (this.currentGalaxy) {
-        // Is the mouse over any of the cryptoids?
+        // Ther user is in a galaxy -- is the mouse over any of the cryptoids?
         const previousMouseOverCryptoids = this.mouseIsOver.cryptoids; // Store the previous mouseover to use in mouseout
         this.mouseIsOver.cryptoids = this.cryptoids.filter((cryptoid) =>
-          ctxUser.isPointInPath(cryptoid.targetArea, e.pageX, e.pageY)
+          ctxUser.isPointInPath(cryptoid.targetPath, e.pageX, e.pageY)
         );
         if (this.mouseIsOver.cryptoids.length && !this.isMouseOverCryptoid) {
           this.isMouseOverCryptoid = true;
@@ -157,26 +157,29 @@ export default {
             cryptoid.handleMouseOut();
           });
         }
-      }
-
-      // Is the mouse over any of the galaxies?
-      const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
-      this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
-        if (galaxy.path) {
-          // Make sure the galaxy has fully loaded its path
-          return ctxUser.isPointInPath(galaxy.path, e.pageX, e.pageY);
+      } else {
+        // The user is in the Cryptoverse -- is the mouse over any of the galaxies?
+        const previousMouseOverGalaxies = this.mouseIsOver.galaxies; // Store the previous mouseover to use in mouseout
+        this.mouseIsOver.galaxies = this.galaxies.filter((galaxy) => {
+          if (galaxy.path) {
+            // Make sure the galaxy has fully loaded its path
+            return ctxUser.isPointInPath(galaxy.path, e.pageX, e.pageY);
+          }
+        });
+        if (this.mouseIsOver.galaxies.length && !this.isMouseOverGalaxy) {
+          this.isMouseOverGalaxy = true;
+          this.mouseIsOver.galaxies.forEach((galaxy) => {
+            galaxy.handleMouseOver();
+          });
+        } else if (
+          !this.mouseIsOver.galaxies.length &&
+          this.isMouseOverGalaxy
+        ) {
+          this.isMouseOverGalaxy = false;
+          previousMouseOverGalaxies.forEach((galaxy) => {
+            galaxy.handleMouseOut();
+          });
         }
-      });
-      if (this.mouseIsOver.galaxies.length && !this.isMouseOverGalaxy) {
-        this.isMouseOverGalaxy = true;
-        this.mouseIsOver.galaxies.forEach((galaxy) => {
-          galaxy.handleMouseOver();
-        });
-      } else if (!this.mouseIsOver.galaxies.length && this.isMouseOverGalaxy) {
-        this.isMouseOverGalaxy = false;
-        previousMouseOverGalaxies.forEach((galaxy) => {
-          galaxy.handleMouseOut();
-        });
       }
     },
     plotGalaxies() {
