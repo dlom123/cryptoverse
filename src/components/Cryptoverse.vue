@@ -1,7 +1,7 @@
 <template>
   <v-container
     fluid
-    :class="['main-container', 'pa-0', 'ma-0', 'fill-height', viewClass]"
+    :class="['canvas-container', 'pa-0', 'ma-0', 'fill-height', viewClass]"
   >
     <v-row no-gutters class="fill-height">
       <v-col id="cryptoverse" class="ma-0 pa-0">
@@ -54,7 +54,7 @@ export default {
   computed: {
     ...mapState(["cryptoids", "currentGalaxy", "galaxies"]),
     canvasHeight() {
-      return this.$refs["bg-canvas"].parentElement.clientHeight;
+      return this.$refs["bg-canvas"].parentElement.clientHeight - 48; // Subtract app bar height
     },
     canvasWidth() {
       return this.$refs["bg-canvas"].parentElement.clientWidth;
@@ -67,7 +67,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setCurrentCryptoid"]),
+    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -246,6 +246,7 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
+    this.setRocket(this.rocket) // Watch certain rocket properties in state
 
     // Subscribe to state mutations
     this.unsubscribe = store.subscribe((mutation, state) => {
