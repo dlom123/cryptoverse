@@ -20,8 +20,8 @@ export default function Rocket(ctx, x = 0, y = 0) {
   this.isLeavingCryptoid = false
   this.isLeavingGalaxy = false
   // Rocket settings
-  this.maxSpeed = 5;
-  this.boostPower = 0.2; // Acceleration increment
+  this.maxSpeed = 4;
+  this.boostPower = 0.1; // Acceleration increment
   this.steering = 5; // Rotation sensitivity
 
   this.spawn = () => {

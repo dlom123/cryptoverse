@@ -11,6 +11,7 @@ export default new Vuex.Store({
     currentCryptoid: null,
     currentGalaxy: null,
     galaxies: [],
+    rocket: null
   },
   mutations,
   actions,

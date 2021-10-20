@@ -11,4 +11,7 @@ export default {
   setGalaxies: (state, payload) => {
     state.galaxies = payload
   },
+  setRocket: (state, payload) => {
+    state.rocket = payload
+  },
 }
