@@ -18,7 +18,7 @@
                     >
                         <v-progress-linear
                             v-show="velocityBars[i-1]"
-                            height="20"
+                            height="15"
                             :color="`orange ${i > 1 && 'lighten-' + (i)}`"
                             :value="velocityBars[i-1]"
                             background-color="transparent"
