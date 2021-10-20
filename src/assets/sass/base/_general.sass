@@ -1,4 +1,8 @@
-.main-container
+@import url(https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap)
+
+$galactic-font: 'Press Start 2P', cursive
+
+.canvas-container
   background-size: cover
   background-repeat: repeat
 
@@ -10,6 +14,26 @@
 
 .canvas.hidden
   display: none
+
+.app-bar
+  font-family: $galactic-font
+  font-size: 10pt
+  .v-toolbar__content
+    border-bottom: 2px solid #888
+  .title
+    font-family: $galactic-font !important
+    font-size: 12pt !important
+    color: orange
+  .rocket-stats
+    color: orange
+    width: 100%
+    .velocity-container
+      height: 19px
+      border: 2px solid lighten(orange, 25%)
+      .velocity-bar
+        // height: 22px
+        // border: 2px solid lighten(orange, 10%)
+        border: none
 
 .cryptoverse
   background-image: url('../images/bg-cryptoverse.png')
