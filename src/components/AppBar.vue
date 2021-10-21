@@ -16,7 +16,11 @@
         <v-spacer></v-spacer>
 
         <v-col cols="1" class="ma-0 pa-0">
-            <v-btn icon>
+            <v-btn
+                id="btn-inventory"
+                icon
+                @click.stop="setShowInventory(!showInventory)"
+            >
                 <v-icon color="blue">mdi-treasure-chest</v-icon>
             </v-btn>
         </v-col>
@@ -26,7 +30,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import RocketStats from "@/components/RocketStats";
 
 export default {
@@ -35,10 +39,13 @@ export default {
         RocketStats
     },
     computed: {
-        ...mapState(['currentGalaxy']),
+        ...mapState(['currentGalaxy', 'showInventory']),
         title() {
           return this.currentGalaxy?.name || 'cryptoverse'
         }
+    },
+    methods: {
+        ...mapMutations(['setShowInventory']),
     }
 }
 </script>

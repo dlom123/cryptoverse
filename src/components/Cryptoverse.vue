@@ -17,6 +17,7 @@
         </canvas>
 
         <CryptoidDetails />
+        <Inventory />
       </v-col>
     </v-row>
   </v-container>
@@ -27,6 +28,7 @@ import { mapMutations, mapState } from "vuex";
 import store from "@/store";
 import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
+import Inventory from "@/components/Inventory";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
@@ -34,6 +36,7 @@ export default {
   name: "Canvas",
   components: {
     CryptoidDetails,
+    Inventory,
   },
   data() {
     return {
