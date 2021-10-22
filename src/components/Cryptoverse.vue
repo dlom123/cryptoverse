@@ -70,7 +70,12 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setInventory", "setRocket"]),
+    ...mapMutations([
+      "setGalaxies",
+      "setCurrentCryptoid",
+      "setInventory",
+      "setRocket",
+    ]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -108,14 +113,7 @@ export default {
     },
     getInventory() {
       this.setInventory({
-        items: [
-          { src: require("../assets/images/items/frunkpuppy.png") },
-          { src: require("../assets/images/items/frunkpuppy.png") },
-          { src: require("../assets/images/items/frunkpuppy.png") },
-          { src: require("../assets/images/items/frunkpuppy.png") },
-          { src: require("../assets/images/items/frunkpuppy.png") },
-          { src: require("../assets/images/items/frunkpuppy.png") },
-        ],
+        items: [{ src: require("../assets/images/items/frunkpuppy.png") }],
         discoveries: [
           { src: require("../assets/images/cryptoids/cardano.png") },
         ],
@@ -128,8 +126,8 @@ export default {
           { src: require("../assets/images/cryptoids/ethereum.png") },
           { src: require("../assets/images/cryptoids/usd-coin.png") },
           { src: require("../assets/images/cryptoids/solana.png") },
-        ]
-      })
+        ],
+      });
     },
     handleSceneChange(galaxy) {
       /* Changes scenes. */
@@ -274,10 +272,10 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
-    this.setRocket(this.rocket) // Watch certain rocket properties in state
+    this.setRocket(this.rocket); // Watch certain rocket properties in state
 
     // Populate inventory
-    this.getInventory()
+    this.getInventory();
 
     // Subscribe to state mutations
     this.unsubscribe = store.subscribe((mutation, state) => {
