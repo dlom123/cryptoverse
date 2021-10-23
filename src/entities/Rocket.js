@@ -3,6 +3,7 @@ import { degreesToRadians, round } from "../functions/helpers"
 
 export default function Rocket(ctx, x = 0, y = 0) {
   // Init variables
+  this.type = "I,Rocket"
   this.ctx = ctx
   this.image = {
     small: new Image(),

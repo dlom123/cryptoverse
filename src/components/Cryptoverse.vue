@@ -17,6 +17,7 @@
         </canvas>
 
         <CryptoidDetails />
+        <Inventory />
       </v-col>
     </v-row>
   </v-container>
@@ -27,6 +28,7 @@ import { mapMutations, mapState } from "vuex";
 import store from "@/store";
 import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
+import Inventory from "@/components/Inventory";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
@@ -34,6 +36,7 @@ export default {
   name: "Canvas",
   components: {
     CryptoidDetails,
+    Inventory,
   },
   data() {
     return {
@@ -67,7 +70,12 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
+    ...mapMutations([
+      "setGalaxies",
+      "setCurrentCryptoid",
+      "setInventory",
+      "setRocket",
+    ]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -102,6 +110,24 @@ export default {
         galaxyCryptoids
       );
       system.generate();
+    },
+    getInventory() {
+      this.setInventory({
+        items: [{ src: require("../assets/images/items/frunkpuppy.png") }],
+        discoveries: [
+          { src: require("../assets/images/cryptoids/cardano.png") },
+        ],
+        worlds: [
+          { src: require("../assets/images/cryptoids/bitcoin.png") },
+          { src: require("../assets/images/cryptoids/dogecoin.png") },
+          { src: require("../assets/images/cryptoids/tether.png") },
+          { src: require("../assets/images/cryptoids/xrp.png") },
+          { src: require("../assets/images/cryptoids/cardano.png") },
+          { src: require("../assets/images/cryptoids/ethereum.png") },
+          { src: require("../assets/images/cryptoids/usd-coin.png") },
+          { src: require("../assets/images/cryptoids/solana.png") },
+        ],
+      });
     },
     handleSceneChange(galaxy) {
       /* Changes scenes. */
@@ -246,7 +272,10 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
-    this.setRocket(this.rocket) // Watch certain rocket properties in state
+    this.setRocket(this.rocket); // Watch certain rocket properties in state
+
+    // Populate inventory
+    this.getInventory();
 
     // Subscribe to state mutations
     this.unsubscribe = store.subscribe((mutation, state) => {
