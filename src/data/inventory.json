@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "src": "frunkpuppy.png"
+    }
+  ],
+  "starship": {
+    "name": "I,Rocket",
+    "thrust": 0,
+    "steering": 0
+  },
+  "worlds": [
+    {
+      "src": "bitcoin.png"
+    },
+    {
+      "src": "dogecoin.png"
+    },
+    {
+      "src": "tether.png"
+    },
+    {
+      "src": "xrp.png"
+    },
+    {
+      "src": "cardano.png"
+    },
+    {
+      "src": "ethereum.png"
+    },
+    {
+      "src": "usd-coin.png"
+    },
+    {
+      "src": "solana.png"
+    }
+  ]
+}

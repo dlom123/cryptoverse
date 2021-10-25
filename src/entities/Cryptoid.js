@@ -1,4 +1,4 @@
-import { getRandomNumber } from "../functions/helpers";
+import { getRandomNumber } from "../helpers/functions";
 
 export default function Cryptoid(ctxBg, ctxUser, coords, name, symbol, rank, filename) {
   this.ctxBg = ctxBg // Background canvas context
@@ -15,7 +15,7 @@ export default function Cryptoid(ctxBg, ctxUser, coords, name, symbol, rank, fil
 
   this.load = async () => {
     await this.loadImage()
-    
+
     this.drawCryptoid(this.img);
   }
 
