@@ -1,4 +1,4 @@
-import { getImgRGBs } from "../functions/helpers"
+import { getImgRGBs } from "../helpers/functions"
 
 export default function Galaxy(id, name, coords, width, height, repCoin, ctxBg, ctxUser) {
   // Init variables

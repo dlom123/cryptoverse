@@ -30,10 +30,6 @@ $galactic-font: 'Press Start 2P', cursive
     .velocity-container
       height: 19px
       border: 2px solid lighten(orange, 25%)
-      .velocity-bar
-        // height: 22px
-        // border: 2px solid lighten(orange, 10%)
-        border: none
 
 .cryptoverse
   background-image: url('../images/bg-cryptoverse.png')
@@ -43,3 +39,18 @@ $galactic-font: 'Press Start 2P', cursive
 
 .img-cryptoid
   border: 2px solid rgba(173, 216, 230, 0.5)
+
+.inventory
+  .card
+    font-family: $galactic-font !important
+    font-size: 8pt !important
+    background-color: black
+    border: 6px solid rgba(33, 150, 243, 0.7)
+    .title
+      font-family: $galactic-font !important
+      font-size: 12pt !important
+  .worlds
+    display: flex
+    overflow-x: auto
+    &::-webkit-scrollbar
+      display: none

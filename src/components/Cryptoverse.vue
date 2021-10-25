@@ -17,16 +17,18 @@
         </canvas>
 
         <CryptoidDetails />
+        <Inventory />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 import store from "@/store";
 import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
+import Inventory from "@/components/Inventory";
 import allGalaxies from "@/data/galaxies.json";
 import allCryptoids from "@/data/cryptoids.json";
 
@@ -34,6 +36,7 @@ export default {
   name: "Canvas",
   components: {
     CryptoidDetails,
+    Inventory,
   },
   data() {
     return {
@@ -67,6 +70,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(["getInventory"]),
     ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
@@ -246,7 +250,10 @@ export default {
       animationContext.canvas.height / 2
     );
     this.rocket.spawn(); // Hello, rocket!
-    this.setRocket(this.rocket) // Watch certain rocket properties in state
+    this.setRocket(this.rocket); // Watch certain rocket properties in state
+
+    // Get all necessary data
+    this.getInventory();
 
     // Subscribe to state mutations
     this.unsubscribe = store.subscribe((mutation, state) => {
