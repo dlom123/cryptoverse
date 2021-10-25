@@ -1,3 +1,4 @@
+import allCryptoids from "@/data/cryptoids.json"
 import inventoryData from "@/data/inventory.json"
 
 export default {
@@ -12,5 +13,9 @@ export default {
       }))
     }
     commit('setInventory', inventory);
+  },
+  getTotalCryptoids: ({ commit }) => {
+    const totalCryptoids = allCryptoids.length
+    commit('setTotalCryptoids', totalCryptoids)
   }
 }

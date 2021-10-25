@@ -20,4 +20,7 @@ export default {
   setShowInventory: (state, payload) => {
     state.showInventory = payload
   },
+  setTotalCryptoids: (state, payload) => {
+    state.totalCryptoids = payload
+  },
 }

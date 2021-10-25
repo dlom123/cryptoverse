@@ -70,7 +70,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["getInventory"]),
+    ...mapActions(["getInventory", "getTotalCryptoids"]),
     ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
@@ -253,6 +253,7 @@ export default {
     this.setRocket(this.rocket); // Watch certain rocket properties in state
 
     // Get all necessary data
+    this.getTotalCryptoids();
     this.getInventory();
 
     // Subscribe to state mutations
