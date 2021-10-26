@@ -1,11 +1,11 @@
 import Cryptoid from './Cryptoid'
 import Galaxy from './Galaxy'
-import Rocket from './Rocket'
+import Starship from './Starship'
 import System from './System'
 
 export {
   Cryptoid,
   Galaxy,
-  Rocket,
+  Starship,
   System
 }

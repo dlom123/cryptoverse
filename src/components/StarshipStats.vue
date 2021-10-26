@@ -1,16 +1,16 @@
 <template>
   <v-col cols="2">
-    <v-row no-gutters class="rocket-stats">
+    <v-row no-gutters class="starship-stats">
       <v-col cols="12">
         velocity
         <!-- ({{coords.x}},{{coords.y}}) -->
       </v-col>
       <v-col cols="6" class="velocity-container">
-        <v-row v-if="rocket" no-gutters>
+        <v-row v-if="starship" no-gutters>
           <v-col
-            v-for="i in rocket.maxSpeed"
+            v-for="i in starship.maxSpeed"
             :key="i"
-            :cols="12 / rocket.maxSpeed"
+            :cols="12 / starship.maxSpeed"
             class="velocity-bar"
           >
             <v-progress-linear
@@ -32,18 +32,18 @@
 import { mapState } from "vuex";
 
 export default {
-  name: "RocketStats",
+  name: "StarshipStats",
   computed: {
-    ...mapState(["rocket"]),
+    ...mapState(["starship"]),
     coords() {
       return {
-        x: parseInt(this.rocket?.position.x),
-        y: parseInt(this.rocket?.position.y),
+        x: parseInt(this.starship?.position.x),
+        y: parseInt(this.starship?.position.y),
       };
     },
     velocityBars() {
-      const fullBars = this.rocket ? parseInt(this.rocket?.speed) : 0;
-      const remPct = parseInt((this.rocket?.speed % 1).toFixed(2) * 100);
+      const fullBars = this.starship ? parseInt(this.starship?.speed) : 0;
+      const remPct = parseInt((this.starship?.speed % 1).toFixed(2) * 100);
       const bars = [...Array(fullBars).fill(100)];
       if (remPct > 0) {
         bars.push(remPct);
@@ -51,9 +51,9 @@ export default {
       return bars;
     },
     velocityPct() {
-      return this.rocket
+      return this.starship
         ? parseInt(
-            ((this.rocket?.speed).toFixed(2) * 100) / this.rocket?.maxSpeed
+            ((this.starship?.speed).toFixed(2) * 100) / this.starship?.maxSpeed
           )
         : 0;
     },

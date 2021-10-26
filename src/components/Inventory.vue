@@ -34,13 +34,13 @@
 
             <v-row class="pa-4" justify="center">
               <v-col cols="auto" align="center" class="pb-2">
-                <div v-if="rocket && rocket.img">
+                <div v-if="starship && starship.img">
                   <v-img
-                    :max-width="rocket.width"
-                    :max-height="rocket.height"
-                    :src="rocket.img.src"
+                    :max-width="starship.width"
+                    :max-height="starship.height"
+                    :src="starship.img.src"
                   />
-                  <div class="mt-4">{{ rocket.type }}</div>
+                  <div class="mt-4">{{ starship.type }}</div>
                 </div>
               </v-col>
             </v-row>
@@ -96,7 +96,7 @@ import { mapMutations, mapState } from "vuex";
 export default {
   name: "Inventory",
   computed: {
-    ...mapState(["inventory", "rocket", "showInventory", "totalCryptoids"]),
+    ...mapState(["inventory", "starship", "showInventory", "totalCryptoids"]),
   },
   methods: {
     ...mapMutations(["setShowInventory"]),
