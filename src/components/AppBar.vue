@@ -18,18 +18,18 @@
       </v-btn>
     </v-col>
 
-    <RocketStats />
+    <StarshipStats />
   </v-app-bar>
 </template>
 
 <script>
 import { mapMutations, mapState } from "vuex";
-import RocketStats from "@/components/RocketStats";
+import StarshipStats from "@/components/StarshipStats";
 
 export default {
   name: "AppBar",
   components: {
-    RocketStats,
+    StarshipStats,
   },
   computed: {
     ...mapState(["currentGalaxy", "showInventory"]),

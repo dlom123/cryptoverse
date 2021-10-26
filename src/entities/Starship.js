@@ -1,7 +1,7 @@
 import store from '../store'
 import { degreesToRadians, round } from "../helpers/functions"
 
-export default function Rocket(ctx, x = 0, y = 0) {
+export default function Starship(ctx, x = 0, y = 0) {
   // Init variables
   this.type = "I,Rocket"
   this.ctx = ctx

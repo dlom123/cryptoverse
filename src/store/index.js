@@ -15,7 +15,7 @@ export default new Vuex.Store({
       items: [],
       worlds: [],
     },
-    rocket: null,
+    starship: null,
     showInventory: false,
     totalCryptoids: null
   },

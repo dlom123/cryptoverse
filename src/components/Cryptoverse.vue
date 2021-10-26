@@ -26,7 +26,7 @@
 <script>
 import { mapActions, mapMutations, mapState } from "vuex";
 import store from "@/store";
-import { Galaxy, Rocket, System } from "@/entities";
+import { Galaxy, Starship, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
 import Inventory from "@/components/Inventory";
 import allGalaxies from "@/data/galaxies.json";
@@ -50,7 +50,7 @@ export default {
         cryptoids: [],
         galaxies: [],
       },
-      rocket: null,
+      starship: null,
       unsubscribe: null,
     };
   },
@@ -71,7 +71,7 @@ export default {
   },
   methods: {
     ...mapActions(["getInventory", "getTotalCryptoids"]),
-    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
+    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setStarship"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -242,15 +242,15 @@ export default {
       this.onMouseMoveCanvas
     );
 
-    // Prep the Rocket!
+    // Prep the Starship!
     const animationContext = this.provider.animationContext;
-    this.rocket = new Rocket(
+    this.starship = new Starship(
       animationContext,
       animationContext.canvas.width / 2,
       animationContext.canvas.height / 2
     );
-    this.rocket.spawn(); // Hello, rocket!
-    this.setRocket(this.rocket); // Watch certain rocket properties in state
+    this.starship.spawn(); // Hello, starship!
+    this.setStarship(this.starship); // Watch certain starship properties in state
 
     // Get all necessary data
     this.getTotalCryptoids();
@@ -273,7 +273,7 @@ export default {
       "mousemove",
       this.onMouseMoveCanvas
     );
-    this.rocket.destroy();
+    this.starship.destroy();
 
     // Unsubscribe from mutations
     this.unsubscribe();

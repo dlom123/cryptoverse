@@ -14,8 +14,8 @@ export default {
   setInventory: (state, payload) => {
     state.inventory = payload
   },
-  setRocket: (state, payload) => {
-    state.rocket = payload
+  setStarship: (state, payload) => {
+    state.starship = payload
   },
   setShowInventory: (state, payload) => {
     state.showInventory = payload
