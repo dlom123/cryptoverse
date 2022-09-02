@@ -9,11 +9,11 @@
     "width": 500,
     "height": 300,
     "repCoin": {
-      "id": 1,
-      "rank": 1,
-      "name": "bitcoin",
-      "symbol": "BTC",
-      "filename": "bitcoin.png"
+      "id": 7,
+      "rank": 7,
+      "name": "solana",
+      "symbol": "SOL",
+      "filename": "solana.png"
     }
   },
   {
