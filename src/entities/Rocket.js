@@ -1,5 +1,5 @@
 import store from '../store'
-import { degreesToRadians, round } from "../functions/helpers"
+import { degreesToRadians, round } from "../helpers/functions"
 
 export default function Rocket(ctx, x = 0, y = 0) {
   // Init variables

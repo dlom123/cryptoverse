@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 import store from "@/store";
 import { Galaxy, Rocket, System } from "@/entities";
 import CryptoidDetails from "@/components/CryptoidDetails";
@@ -70,12 +70,8 @@ export default {
     },
   },
   methods: {
-    ...mapMutations([
-      "setGalaxies",
-      "setCurrentCryptoid",
-      "setInventory",
-      "setRocket",
-    ]),
+    ...mapActions(["getInventory", "getTotalCryptoids"]),
+    ...mapMutations(["setGalaxies", "setCurrentCryptoid", "setRocket"]),
     createCryptoverse() {
       /* Creates and populates the entire Cryptoverse. */
 
@@ -110,24 +106,6 @@ export default {
         galaxyCryptoids
       );
       system.generate();
-    },
-    getInventory() {
-      this.setInventory({
-        items: [{ src: require("../assets/images/items/frunkpuppy.png") }],
-        discoveries: [
-          { src: require("../assets/images/cryptoids/cardano.png") },
-        ],
-        worlds: [
-          { src: require("../assets/images/cryptoids/bitcoin.png") },
-          { src: require("../assets/images/cryptoids/dogecoin.png") },
-          { src: require("../assets/images/cryptoids/tether.png") },
-          { src: require("../assets/images/cryptoids/xrp.png") },
-          { src: require("../assets/images/cryptoids/cardano.png") },
-          { src: require("../assets/images/cryptoids/ethereum.png") },
-          { src: require("../assets/images/cryptoids/usd-coin.png") },
-          { src: require("../assets/images/cryptoids/solana.png") },
-        ],
-      });
     },
     handleSceneChange(galaxy) {
       /* Changes scenes. */
@@ -274,7 +252,8 @@ export default {
     this.rocket.spawn(); // Hello, rocket!
     this.setRocket(this.rocket); // Watch certain rocket properties in state
 
-    // Populate inventory
+    // Get all necessary data
+    this.getTotalCryptoids();
     this.getInventory();
 
     // Subscribe to state mutations

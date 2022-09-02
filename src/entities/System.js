@@ -1,6 +1,6 @@
 import store from '../store'
 import { Cryptoid } from "../entities";
-import { getRandomNumber } from "../functions/helpers";
+import { getRandomNumber } from "../helpers/functions";
 
 export default function System(ctx, id, name, repCoin, cryptoids) {
   this.ctx = ctx
@@ -46,13 +46,13 @@ export default function System(ctx, id, name, repCoin, cryptoids) {
         y: this.ctx.bg.canvas.height / 2
       }
       if (i > 0) {
-        const op = this.orbitalPaths[i-1] // Adjust for skipping the representative cryptoid
+        const op = this.orbitalPaths[i - 1] // Adjust for skipping the representative cryptoid
         const a = getRandomNumber(0, 360) // Use a random angle
         coords.x = (this.ctx.bg.canvas.width / 2) + op.radiusX * Math.cos(a), // The x point along the orbital path
-        coords.y = (this.ctx.bg.canvas.height / 2 + op.paddingY) + op.radiusY * Math.sin(a) // The y point along the orbital path
+          coords.y = (this.ctx.bg.canvas.height / 2 + op.paddingY) + op.radiusY * Math.sin(a) // The y point along the orbital path
       }
-      
-      
+
+
       const cryptoid = new Cryptoid(
         this.ctx.bg,
         this.ctx.user,
@@ -61,18 +61,18 @@ export default function System(ctx, id, name, repCoin, cryptoids) {
         c.symbol,
         c.rank,
         c.filename
-        )
-        
-        return cryptoid
-      });
+      )
 
-      // Set cryptoids in state
-      store.commit('setCryptoids', this.cryptoids)
+      return cryptoid
+    });
+
+    // Set cryptoids in state
+    store.commit('setCryptoids', this.cryptoids)
   }
 
   this.plotCryptoids = () => {
     /* Plots each cryptoid in the system along an orbital path. */
-    
+
     // Plot the representative cryptoid in the center of the system
     const rep = this.cryptoids[0]
     rep.load()

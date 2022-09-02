@@ -64,7 +64,9 @@
         <v-col>
           <v-card min-width="600" max-width="800" class="card">
             <v-card-title class="title pt-2 pb-0 pl-3"
-              >Worlds ({{ inventory.worlds.length }})</v-card-title
+              >Worlds ({{ inventory.worlds.length }}/{{
+                totalCryptoids
+              }})</v-card-title
             >
 
             <v-row class="pa-4">
@@ -94,7 +96,7 @@ import { mapMutations, mapState } from "vuex";
 export default {
   name: "Inventory",
   computed: {
-    ...mapState(["inventory", "rocket", "showInventory"]),
+    ...mapState(["inventory", "rocket", "showInventory", "totalCryptoids"]),
   },
   methods: {
     ...mapMutations(["setShowInventory"]),

@@ -16,7 +16,8 @@ export default new Vuex.Store({
       worlds: [],
     },
     rocket: null,
-    showInventory: false
+    showInventory: false,
+    totalCryptoids: null
   },
   mutations,
   actions,
