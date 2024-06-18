@@ -4,6 +4,8 @@
 
 Explore the galaxy by visiting your favorite blockchain systems and collecting memorabilia along the way!
 
+![Cryptoverse screenshot](https://github.com/dlom123/cryptoverse/blob/main/public/img/screenshot.png?raw=true)
+
 ## Controls
 
 | Key | Function |
